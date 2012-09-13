@@ -1,111 +1,156 @@
-#!/usr/bin/perl -W
+#!/usr/bin/perl
 
-use strict;
-use warnings;
+# Disable deprecation warnings. Some versions
+# of perl dislike goto into procedures.
+no warnings 'deprecated';
 
-print "Begin listing derangements\n";
-
-foreach my $d (derange(4))
-{
-    printList(@$d);
-}
-
+# printList($listReference)
 #
-# derange
-#
-# Given a positive integer $n, return all
-# derangements of the list [1, ..., $n].
-#
-sub derange
-{
-    my ($n) = @_;
-
-    # Initialize storage for remaining items per level
-    my @remain;
-    for ( my $i = 0; $i <= $n; $i++ )
-    {
-        $remain[$i] = [()];
-    }
-
-    $remain[0] = [(1 .. $n)];
-
-    printList(@{$remain[0]});
-
-    my @derangements;
-    foreach my $i (@{$remain[0]})
-    {
-        print "i = $i \n";
-        if ( $i != 1 )
-        {
-	     $remain[1] = [deleteFromListByValue($i, @{$remain[0]})];
-             foreach my $j (@{$remain[1]})
-             {
-                 print "\tj = $j \n";
-                 if ( $j != 2 )
-                 {
-	             $remain[2] = [deleteFromListByValue($j, @{$remain[1]})];
-                     foreach my $k (@{$remain[2]})
-                     {
-                         print "\t\tk = $k \n";
-                         if ( $k != 3 )
-                         {
-	                     $remain[3] = [deleteFromListByValue($k, @{$remain[2]})];
-                             foreach my $m (@{$remain[3]})
-                             {
-                                 print "\t\t\tm = $m \n";
-                                 if ( $m != 4 )
-                                 {
-                                     push @derangements, [($i, $j, $k, $m)];
-                                 }
-                             }
-                         }
-                     }
-                 }
-             }
-        }
-    } 
-
-    return @derangements;
-}
-
-#
-# printList
-#
-# Given a list, print the elements of the list
-# delimited with commas, surrounded by square
-# brackets.
+# Given a reference to a list, print the elements of that list.
 #
 sub printList
 {
-    my (@list) = @_;
-    print "[", join(',', @list), "]\n";
+    @list = @{$_[0]};
+
+    print("[" . join(", ", @list) . "]");
 }
 
+# okSoFar($i, $listReference)
 #
-# deleteFromListByValue
-# 
-# Given a list, make a return a copy of the list
-# with the first occurrence of the given element
-# excluded.
+# Helper function for derangements()
 #
-sub deleteFromListByValue
+# Given an index i and reference to a list, check that:
+#  1. The ith element of the list doesn't equal i
+#  2. The ith element of the list doesn't also occur
+#     at any position k < i.
+#
+sub okSoFar
 {
-    my ($value, @list) = @_;
+    # Get parameters.
+    $i = $_[0];
+    @list = @{$_[1]}; # Dereference the list reference argument.
 
-    my $found = 0;
-    my @out = ();
+    $target = $list[$i];
 
-    for ( my $i = 0; $i < @list; $i++ )
+    $ok = 1;
+
+    # If list[i] == i, we fail.
+    if ( $target == $i + 1 )
     {
-        if ( !$found && $list[$i] == $value )
+        return 0;
+    }
+
+    # For each k < i, if list[k] == list[i], we fail.
+    for ( my $k = 0; $k < $i; $k += 1 )
+    {
+        if ( $list[$k] == $target )
         {
-            $found = 1;
+            return 0;
+        }
+    }
+
+    # In any other case, we're OK.
+    return 1;
+}
+
+# derangements($n)
+#
+# Given an integer n > 0, print all derangements
+# of the list [1, ..., n].
+
+sub derangements
+{
+
+    # Get parameters.
+    $n = $_[0];
+
+    # Give a name to the starting index. Perhaps we'll change it later.
+    $init = 0;
+
+    # Initialize the derangement to zeros. This list will hold the derangement
+    # we are currently working on. 
+    @derangement = ();
+
+    # Since we are translating power loop syntax into a series gotos, the below
+    # code models each flowchart box in the diagram from [Finkel 96, p. 51].
+
+    # Initialization. 
+    initialization:
+        $level = $init;
+
+    # Upper conditional. Check upper bound on $level.
+    # Can branch to body or replicatedPart.
+    upperConditional:
+        if ( $level >= $n )
+        {
+            goto body;
         }
         else
         {
-            push @out, $list[$i];
+            goto replicatedPart;
         }
-    }
-    return @out;
+
+    # Body. Code executed at the deepest level of nesting.
+    # Branches to decrementLevel.
+    body:
+        printList(\@derangement);
+        print("\n");
+        goto decrementLevel;
+
+    # Decrement Level. Decrease nesting level.
+    # Branches to lowerConditional.
+    decrementLevel:
+        $level -= 1;
+        goto lowerConditional;
+
+    # Increment Level. Increase nesting level.
+    # Branches to upperConditional.
+    incrementLevel:
+        $level += 1;
+        goto upperConditional;
+
+    # Replicated Part. Code replicated in each level of nesting.
+    # Can branch to incrementLevel or decrementLevel.
+    replicatedPart:
+        for ( $derangement[$level] = $init + 1;
+              $derangement[$level] <= $n;
+              $derangement[$level] += 1 )
+        {
+            # print("derangement[$level] = " . $derangement[$level] . "\n");
+            if ( okSoFar($level, \@derangement) )
+            {
+                goto incrementLevel;
+
+                returnLabel:
+            }
+        }
+        goto decrementLevel;
+
+    # Lower Conditional: Check lower bound on $level.
+    # Can branch to done, or to the return label within replicatedPart.
+    lowerConditional:
+        # print("Top of lowerConditional level = $level\n");
+        if ( $level < $init )
+        {
+            goto done;
+        }
+        else
+        {
+            goto returnLabel;
+        }
+
+
+    # Done. Computation complete.
+    done:
 }
 
+$argc = $#ARGV + 1;
+
+if ( $argc != 1 || $ARGV[0] < 1 )
+{
+    print("\nUsage: derangement.pl n\nGiven n > 0,"
+          . " print all derangements of [1, ..., n]\n");
+    exit;
+}
+
+derangements($ARGV[0]);

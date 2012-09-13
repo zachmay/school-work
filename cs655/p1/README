@@ -1,0 +1,50 @@
+Zachary May
+CS 655
+Program 1 - Derangements
+
+Two programs are included to generate derangements of [1, ..., n] given n.
+
+- A Perl implementation, using a goto-based unfolding of power loop syntax.
+
+  Invocation: ./derangement.pl N 
+    - N < 1 will exit with usage message
+
+  Note: Recent versions of Perl have deprecated gotos jumping into certain 
+  constructs. I have included a statement to suppress deprecation warnings
+  in the Perl implementation to silence that for this script.
+
+- A Python implementation. This is actually two separate implementations,
+  a naive reference implementation that simply filters a list permutations
+  using a predicate that checks for the derangement property, and an
+  implemntation using recursive generators.
+ 
+  Invocation: python derangement.py [-n|--naive] N
+    - N < 1 will exit with usage message.
+    - The -n/--naive flag uses the naive implementation.
+  
+A shell script test.sh is also included that runs through some automated
+tests. It writes derangements for n = 1, 5, 10 to disk and uses diff
+to compare them all, printing some timing information along the way.
+If diff finds any differences, they are output in the usual format.
+Be advised, the test case for n = 10 is quite slow (primarily the perl
+implementation) and uses quite a bit of disk.
+
+Below is a Perl-like imagining of power-loop syntax and is the basis
+for the goto-based implementation in derangement.pl.
+
+nest ( $level = 1 to $n )
+{
+   for ( $derangement[$level] = 1;
+         $derangement[$level] <= $n;
+         $derangement[$level] += 1 )
+   {
+       if ( $derangement[$level] != $level && okSoFar($level, \@derangement) )
+       {
+           deeper;
+       }
+   }
+}
+do
+{
+   printList(@derangement);
+}
