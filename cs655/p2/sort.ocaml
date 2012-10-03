@@ -1,40 +1,182 @@
-let rec take n list =
-    match list with []          -> []
-                  | (x :: rest) -> match n with 0 -> []
-                                              | n -> x :: (take (n - 1) rest)
+(* Open List package to get some functions for testing. *)
+open List
 
-let rec drop n list =
-    match list with [] -> []
-                  | (x :: rest) -> match n with 0 -> (x :: rest)
-                                              | n -> drop (n - 1) rest
+val reload = fn _ => use "sort.ml"; (* helps during repeated runs *)
 
-let split list = 
-    (* Finding the midpoint to split at uses integer division. *)
-    let takeLength = (List.length list) / 2 in
-        (take takeLength list, drop takeLength list)
+(* Helper Functions *)
 
-let rec mergeSort theList =
-    match theList with []        -> []
-                     | [x]       -> [x]
-                     | otherwise -> let left, right = split theList in
-                                        List.merge compare (mergeSort left) (mergeSort right)
+(* take n xs
+ *
+ * Return the first n elements of the list xs, or all of xs if
+ * length xs <= n *)
+fun take n [] = []
+  | take 0 _  = []
+  | take n (x :: rest) = x :: (take (n - 1) rest)
 
-(* INSERTION SORT *)
+(* drop n xs
+ *
+ * Return xs with the first n elements removed, or the empty list
+ * if length xs <= n *)
+fun drop n [] = []
+  | drop 0 xs = xs
+  | drop n (x :: rest) = drop (n - 1) rest
 
-let rec insert x list = 
-    match list with []                     -> [x]
-                  | (y :: rest) when x < y -> x :: list
-                  | (y :: rest)            -> y :: (insert x rest)
+(* split xs
+ *
+ * Split the list xs roughly in half. Returns a pair of lists, one with
+ * the first floor(n / 2) items, the other with the last ceil(n/2) items,
+ * where n = length xs. *)
+val split = fn xs =>
+    let
+        (* Finding the midpoint to split at uses integer division. *)
+        val takeLength = (length xs) div 2
+    in
+        (take takeLength xs, drop takeLength xs)
+    end
 
-let rec insertionSort' sorted unsorted = 
-    match unsorted with []          -> sorted
-                      | (x :: rest) -> insertionSort' (insert x sorted) rest
 
-let insertionSort list = insertionSort' [] list
-   
-(* HEAP SORT *)
+(* merge comparator xs ys
+ *
+ * Given a comparison function and two lists, merge the lists by
+ * recursively taking the smaller of the two head elements until either list
+ * is empty. If xs and ys are sorted in increasing order, merge xs ys 
+ * will be sorted in increasing order.
+ *
+ * comparator is a function of type 'a -> 'a -> bool that returns true if
+ * the first argument should compare as less than the second.
+ *)
+fun merge comparator xs [] = xs
+  | merge comparator [] ys = ys
+  | merge comparator (x::xs) (y::ys) = if comparator x y then
+                                           x :: (merge comparator xs (y::ys))
+                                       else
+                                           y :: (merge comparator (x::xs) ys)
 
-type 'a heap = { storage: 'a array, lastIndex: int }
+(* insert comparator x ys
+ *
+ * Insert x into its proper position ys (assuming ys is sorted) 
+ * 
+ * Uses a comparator function as in merge to determine when one
+ * element is smaller than another.
+ *)
+fun insert comparator x [] = [x]
+  | insert comparator x (y::ys) = if comparator x y then
+                                      x :: y :: ys
+                                  else
+                                      y :: (insert comparator x ys)
 
-heapInsert heap x = heapInsert' heap x 0
-heapInsert' heap x i = 
+
+(* mergeSort comparator xs
+ *
+ * Given a comparator function as in merge, sort a list using mergesort. *)
+fun mergeSort _ [] = []
+  | mergeSort _ [x] = [x]
+  | mergeSort comparator xs = let
+                                  val (left, right) = split xs
+                              in
+                                  merge comparator
+    		                (mergeSort comparator left)
+			                (mergeSort comparator right)
+                              end
+
+(* insertionSort' xs
+ *
+ * Helper function  for insertionSort. Inserts the head of the unsorted
+ * list into its proper place in the sorted list, then recurses with the rest
+ * of the unsorted list. Uses a comparator function as in merge for ordering. *)
+fun insertionSort' comparator sorted []      = sorted
+  | insertionSort' comparator sorted (x::xs) = insertionSort' comparator
+                                                              (insert comparator x sorted)
+                                                              xs
+
+(* insertionSort xs
+ *
+ * Cleaner interface to insertionSort'. *)
+fun insertionSort comparator xs = insertionSort' comparator [] xs
+
+(* Convenient comparison functions! *)
+fun intCompare (x:int) (y:int) = x < y
+fun stringCompare (x:string) (y:string) = x < y
+
+(* Define the money data type from the notes. *)
+datatype money = nomoney
+               | coin of int 
+               | bill of int
+               | check of string * int;
+
+(* Define a function to convert a money value to an integer
+ * value equal to its value in cents. *)
+fun toCents nomoney     = 0
+  | toCents (coin n)    = n
+  | toCents (bill n)    = 100 * n
+  | toCents (check (s,n)) = 100 * n
+
+(* Compare two money elements based on their raw value. *)
+fun moneyAmountCompare m1 m2 = (toCents m1) < (toCents m2)
+
+(* Compare two money elements based on payment type preferences:
+ * - Bills are best.
+ * - Then coins. They're heavy.
+ * - The checks. They can bounce.
+ * - Then nomoney. I have to get paid. *)
+fun moneyMethodCompare (bill _) _         = false
+  | moneyMethodCompare (coin _) (check _) = false
+  | moneyMethodCompare _        nomoney   = false
+  | moneyMethodCompare _        _         = true
+
+(* Take a comparator and "invert" it, so that sorting
+ * via the inverted comparator sorts in reverse order.
+ *
+ * e.g., insertionSort (invert intCompare) xs return
+ * the list sorted from large to small. *)
+fun invert f x y = not (f x y)
+
+(* Set up some test cases *)
+val intList           = [9,1,2,8,3,5,10,7,6,4]
+val intListSorted     = [1,2,3,4,5,6,7,8,9,10]
+
+val realList          = [9.473, 0.1, ~0.002, 485652.52, ~9.0]
+val realListSorted    = [~9.0, ~0.002, 0.1, 9.473, 485652.52]
+
+val stringList        = ["It", "was", "the", "best", "of", "times", ",",
+                         "it", "was", "the", "worst", "of", "times", "."] 
+val stringListSorted  = [",", ".", "It", "best", "it", "of", "of", "the",
+                         "the", "times", "times", "was", "was", "worst"] 
+
+val moneyList = [coin 10, check ("The Bank", 50), bill 10, nomoney]
+val moneyListAmountSorted = [nomoney, coin 10, bill 10, check ("The Bank", 50)]
+val moneyListMethodSorted = [nomoney, check("The Bank", 50), coin 10, bill 10]
+
+(* Run some tests. *)
+val testResults = [
+    (* Integer sorting. *)
+    (insertionSort intCompare intList) = intListSorted,
+    (insertionSort intCompare []) = [],
+    (mergeSort intCompare intList) = intListSorted,
+    (mergeSort intCompare []) = [],
+    (mergeSort (invert intCompare) intList)
+        = rev (insertionSort intCompare intList),
+    (* String sorting *)
+    (insertionSort stringCompare stringList) = stringListSorted,
+    (insertionSort stringCompare []) = [],
+    (mergeSort stringCompare stringList) = stringListSorted,
+    (mergeSort stringCompare []) = [],
+    (mergeSort (invert stringCompare) stringList)
+        = rev (insertionSort stringCompare stringList),
+    (* Money sorting, by amount *)
+    (insertionSort moneyAmountCompare moneyList) = moneyListAmountSorted,
+    (insertionSort moneyAmountCompare []) = [],
+    (mergeSort moneyAmountCompare moneyList) = moneyListAmountSorted,
+    (mergeSort moneyAmountCompare []) = [],
+    (mergeSort (invert moneyAmountCompare) moneyList)
+        = rev (insertionSort moneyAmountCompare moneyList),
+    (* Money sorting, by method *)
+    (insertionSort moneyMethodCompare moneyList) = moneyListMethodSorted,
+    (insertionSort moneyMethodCompare []) = [],
+    (mergeSort moneyMethodCompare moneyList) = moneyListMethodSorted,
+    (mergeSort moneyMethodCompare []) = [],
+    (mergeSort (invert moneyMethodCompare) moneyList)
+        = rev (insertionSort moneyMethodCompare moneyList)
+]
+
+val testsOK = all (fn x => x) testResults    
