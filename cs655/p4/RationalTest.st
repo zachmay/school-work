@@ -1,9 +1,13 @@
 Test subclass: #RationalTest.
-RationalTest instanceVariableNames: 'zero three newOver zeroSimplified simplified1 simplified2 negSimplified1 negSimplified2 negSimplified3 negSimplified4 negSimplified5'.
+RationalTest instanceVariableNames: 'zero three newOver zeroSimplified '
+                                  , 'simplified1 simplified2 negSimplified1 '
+                                  , 'negSimplified2 negSimplified3 '
+                                  , 'negSimplified4 negSimplified5'.
 RationalTest comment: 'Test suite for class Rational'.
 
 RationalTest extend
 [
+    " Some test fixtures. "
     setUp [
         zero           := Rational new.                    "0/1"
         three          := Rational new: 3.                 "3/1"
@@ -89,12 +93,3 @@ RationalTest extend
         self failsOn: [(2 %% 3) / (0 %% 1)].
     ]
 ]
-
-RationalTest new setUp; testCreation.
-RationalTest new setUp; testFancyCreation.
-RationalTest new setUp; testAdd.
-RationalTest new setUp; testSubtract.
-RationalTest new setUp; testMultiply.
-RationalTest new setUp; testDivide.
-
-!
