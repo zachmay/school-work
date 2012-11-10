@@ -1,0 +1,60 @@
+Zachary May
+CS 655
+Program 3 - Deep Binding in the Metacircular Lisp Evaluator
+
+Two source files are included:
+ - eval.lisp: The metacircular evaluator, with modifications.
+ - test-eval.lisp: Set-up and execution of automated tests.
+
+Usage: To execute the automated tests, enter at the command prompt:
+
+> gcl -load test-eval.lisp
+
+To load the evaluator machinery for manual testing:
+
+> gcl -load eval.lisp
+
+Implementation: The primary modification to the evaluator was adding deep
+binding through the 'function' and 'funcall' functions.
+
+The function 'function', takes a lambda expression and returns a (makeshift)
+closure, wrapping the lambda expression in a list with the tag 'closed as well
+as the current evaluation environment. An example return value:
+
+'(closure (lambda (x) (+ x z)) ((z 1) (m 2) (n 3))
+
+This closure represents the lambda expression given, to be evaluated in an
+environment where z is bound to the value 1.
+
+The function 'funcall' applies a closure built by 'function'. For example:
+
+(funcall '(closure (lambda (x y) (+ x y z)) ((z 1))) m n)
+Current environment: '((m 10) (n 100))
+
+For safety reasons, it first checks to see that, at the very least, the head
+of the closure S-Expression is the atom 'closed, although this does not
+guarantee that the rest of the S-Expression is appropriately structured.
+
+It then evaluates the argument list in the *current* environment. That is, m
+and n above will evaluate to 10 and 100 respectively, not the values 2 and 3
+inside the closure.
+
+At that point, normal function application occurs, using the closure's lambda 
+expression and referencing environment, with the actual parameters that were
+just evaluated.
+
+I also added a few other "built-in" functions to the evaluator to allow for the
+implementation of most of the examples seen in class. These are mostly just
+evaluated as pass-throughs to the real Lisp evaluator. 
+
+The test suite provided demonstrates that modifications did not break the
+proper behavior of the evaluator as well as proper deep binding behavior made
+possible by the new additions. It was very handy having a test suite to run
+to make sure tweaks did not break the whole system.
+
+One limitation that I did not have time to overcome was the ability to pass
+bare function names to 'function'. For example, I initially had the 
+'selfCompose' examples in the test suite, which composed 'cons' with itself,
+but could never make it work properly with 'function'. More specifically, I
+never found a consistent way to have 'funcall' deal with both simple 
+atomic function names and full lambda expressions.
