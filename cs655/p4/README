@@ -1,0 +1,56 @@
+Zachary May
+CS 655
+Program 4 - Dimensions in Smalltalk and Java
+
+Organization:
+- README: this file.
+- Makefile: offers the following targets:
+   - java-build: build Java implementation.
+   - java-test: execute Java tests.
+   - st-test: execute Smalltalk tests.
+   - clean: clean-up generated Java classes.
+- java/: Java source, including tests.
+   - java/class: Generated classes go here. Created if necessary.
+- st/: Smalltalk source, including tests.
+
+Usage: Use make and the above targets to build and run all tests.
+
+> make java-build
+> make java-test
+> make st-test
+> make clean
+
+Implementation: 
+
+The Java and Smalltalk implementations mirror each other pretty closely. 
+In each, a class Rational represents standard mathematical rational numbers,
+including basic arithmetic operations, equality testing, and normalization:
+fractions are reduced and negative signs simplified.
+
+A Dimension class models dimensional expressions. For example, density, mass
+per unit volume, is represented by a triple (-3, 1, 0). The class encapsulates
+this and offers inversion, multiplication, division, and equality testing.
+
+DRational represents a Rational magnitude paired with a Dimension value
+representing the dimension of the value. These values implicitly represent
+base SI units:
+
+ - 1 meter    => (1/1) (1, 0, 0)
+ - 1 kilogram => (1/1) (0, 1, 0)
+ - 1 second   => (1/1) (0, 0, 1)
+
+Other units are simply multiples of these base units (m^2, m/s^2, etc.) or
+scalar multiples thereof. For example:
+ - 1 foot          => (3048/10000) (1, 0, 0)
+ - 1 mile per hour => (44704/100000) (1, 0, -1)
+
+Observations: I found the syntax of Smalltalk allowed for a library design
+that felt like a nice domain-specific language for unit calculations. The
+Java implementation is awkward by comparison.
+
+On the other hand, Smalltalk's dynamic typing made development difficult at
+times. Still not accustomed to Smalltalk's precedence rules, I often ended up
+sending messages to the wrong object and only finding out about it at runtime
+when an expression was evaluated. Granted, this is why test-driven development
+is so popular with dynamically-typed languages, but I much prefer static type
+checks for basic issues like this.

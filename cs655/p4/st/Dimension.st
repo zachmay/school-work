@@ -4,8 +4,14 @@ Dimension comment: 'I represent the physical dimension of a value.'.
 
 Dimension class extend
 [
+    " Dimension constructor. "
     new [
         ^ super new init.
+    ]
+
+    " Helper methods for several commonly used dimensions. "
+    scalar [
+        ^ self new.
     ]
     
     length [
@@ -23,10 +29,25 @@ Dimension class extend
     angle [
         ^ self new angle: 1.
     ]
+
+    velocity [
+        ^ self new length: 1;
+                   time:   -1.
+    ]
+
+    acceleration [
+        ^ self new length: 1;
+                   time:   -2.
+    ]
+
+    area [
+        ^ self new length: 2.
+    ]
 ]
 
 Dimension extend
 [
+    " Dimension instance initialization. "
     init [
         ^ self length: 0;
                mass:   0;
@@ -34,6 +55,7 @@ Dimension extend
                angle:  0.
     ]
 
+    " Convert a Dimension to a printable representation. "
     printString 
     [
         ^ '(' , (length printString) , ','
@@ -42,13 +64,15 @@ Dimension extend
               , (angle printString)  , ')'.
     ]
 
+    " Return a new Dimension with negated exponents. "
     invert [
-        self length: (length negated);
-             mass:   (mass negated);
-             time:   (time negated);
-             angle:  (angle negated).
+        ^ Dimension new length: (length negated);
+                        mass:   (mass negated);
+                        time:   (time negated);
+                        angle:  (angle negated).
     ]
 
+    " Dimension multiplication. "
     * dim [
         ^ Dimension new length: (self length + dim length);
                         mass:   (self mass + dim mass);
@@ -56,14 +80,20 @@ Dimension extend
                         angle:  (self angle + dim angle).
     ]
 
+    " Dimension division. "
     / dim [
         ^ self * (dim invert).
     ]
 
+    " Dimension equality. "
     = dim [
-        
+        ^ (self length = dim length)
+        & (self mass   = dim mass)
+        & (self time   = dim time)
+        & (self angle  = dim angle).
     ]
 
+    " Getters and setters for dimension exponents. "
     length    [ ^ length ]
     length: l [ length := l ]
 

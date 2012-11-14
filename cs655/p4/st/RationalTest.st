@@ -23,7 +23,7 @@ RationalTest extend
     ]
 
     testCreation [
-        'Testing creation...' displayNl.
+        'Testing rational creation...' displayNl.
         self for: (zero num)           expect: 0.
         self for: (zero den)           expect: 1.
         self for: (three num)          expect: 3.
@@ -50,14 +50,14 @@ RationalTest extend
     ]
 
     testFancyCreation [
-        'Testing creation with %%...' displayNl.
+        'Testing rational creation with %%...' displayNl.
         self for: (0 %% 1)  expect: zero.
         self for: (2 %% -4) expect: negSimplified3.
         self failsOn: [2 %% 0].
     ]
 
     testAdd [
-        'Testing addition...' displayNl.
+        'Testing rational addition...' displayNl.
         self for: (1 %% 2) + (1 %% 2)  expect: (1 %% 1).
         self for: (1 %% 2) + (-1 %% 2) expect: (0 %% 1).
         self for: (2 %% 3) + (1 %% 6)  expect: (5 %% 6).
@@ -65,7 +65,7 @@ RationalTest extend
     ]
 
     testSubtract [
-        'Testing subtraction...' displayNl.
+        'Testing rational subtraction...' displayNl.
         self for: (1 %% 2) - (1 %% 2)  expect: (0 %% 1).
         self for: (1 %% 2) - (-1 %% 2) expect: (1 %% 1).
         self for: (2 %% 3) - (1 %% 6)  expect: (1 %% 2).
@@ -73,7 +73,7 @@ RationalTest extend
     ]
 
     testMultiply [
-        'Testing multiplication...' displayNl.
+        'Testing rational multiplication...' displayNl.
         self for: (1 %% 2) * (1 %% 2)   expect: (1 %% 4).
         self for: (-1 %% 2) * (-1 %% 2) expect: (1 %% 4).
         self for: (1 %% 2) * (-1 %% 2)  expect: (-1 %% 4).
@@ -83,7 +83,7 @@ RationalTest extend
     ]
 
     testDivide [
-        'Testing division...' displayNl.
+        'Testing rational division...' displayNl.
         self for: (1 %% 2) / (1 %% 2)   expect: (1 %% 1).
         self for: (-1 %% 2) / (-1 %% 2) expect: (1 %% 1).
         self for: (1 %% 2) / (-1 %% 2)  expect: (-1 %% 1).

@@ -99,8 +99,8 @@ Rational extend
     + aRational
     [ |newNum newDen|
         
-        newDen := (self den) * (aRational den).
-        newNum := ((self num) * (aRational den)) + ((aRational num) * (self den)).
+        newDen := den * (aRational den).
+        newNum := (num * (aRational den)) + ((aRational num) * den).
 
         ^ Rational new: newNum over: newDen
     ]
@@ -130,7 +130,7 @@ Rational extend
     " Equality with aRational. "
     = aRational
     [
-        ^ (self num = aRational num) & (self den = aRational den).
+        ^ (num = aRational num) & (den = aRational den).
     ]
 
     " Simple accessors "
@@ -138,6 +138,7 @@ Rational extend
     den [ ^ den ]
 ]
 
+" Extension to Integer allowing construction of rationals like 'n %% m'. "
 Integer extend
 [
     %% anInteger
