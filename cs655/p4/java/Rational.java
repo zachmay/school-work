@@ -115,17 +115,40 @@ public class Rational
         return new Rational(this.getDen(), this.getNum());
     }
 
+    /************************
+     * Relational operators.
+     ************************/
     public boolean equals(Object other)
     {
         if ( other instanceof Rational )
         {
             Rational r = (Rational) other;
 
-            return getNum() == r.getNum()
-                && getDen() == r.getDen();
+            return this.getNum() == r.getNum()
+                && this.getDen() == r.getDen();
         }
 
         return false;
+    }
+
+    public boolean lt(Rational r)
+    {
+        return this.getNum() * r.getDen() < r.getNum() * this.getDen();
+    }
+
+    public boolean lte(Rational r)
+    {
+        return this.lt(r) || this.equals(r);
+    }
+
+    public boolean gt(Rational r)
+    {
+        return this.getNum() * r.getDen() > r.getNum() * this.getDen();
+    }
+
+    public boolean gte(Rational r)
+    {
+        return this.gt(r) || this.equals(r);
     }
 
     /*******************

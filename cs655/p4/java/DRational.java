@@ -134,6 +134,9 @@ public class DRational
                             , this.getDimension().div(d.getDimension()) );
     }
 
+    /************************
+     * Relational operators.
+     ************************/
     public boolean equals(Object other)
     {
         if ( other instanceof DRational )
@@ -144,6 +147,30 @@ public class DRational
         }
 
         return false;
+    }
+
+    public boolean lt(DRational d)
+    {
+        this.dimensionSafe(d);
+        return this.getMagnitude().lt(d.getMagnitude());
+    }
+
+    public boolean lte(DRational d)
+    {
+        this.dimensionSafe(d);
+        return this.getMagnitude().lte(d.getMagnitude());
+    }
+
+    public boolean gt(DRational d)
+    {
+        this.dimensionSafe(d);
+        return this.getMagnitude().gt(d.getMagnitude());
+    }
+
+    public boolean gte(DRational d)
+    {
+        this.dimensionSafe(d);
+        return this.getMagnitude().gte(d.getMagnitude());
     }
 
     /*******************

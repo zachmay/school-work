@@ -1,5 +1,5 @@
 Test subclass: #DRationalTest.
-DRationalTest instanceVariableNames: 'halfMeter oneFoot oneHour'.
+DRationalTest instanceVariableNames: 'halfMeter oneFoot oneHour oneSecond'.
 DRationalTest comment: 'Test suite for class DRational, dimensioned rationals.'.
 
 
@@ -9,6 +9,7 @@ DRationalTest extend
         halfMeter := DRational new: (1 %% 2) in: (Dimension length).
         oneFoot   := DRational foot.
         oneHour   := DRational hour.
+        oneSecond := DRational second.
     ]
 
     testCreation [
@@ -60,5 +61,23 @@ DRationalTest extend
         self for: (oneFoot / halfMeter) expect: oneFootDivHalfMeter.
         oneFootDivOneHour := DRational new: (127 %% 1500000) in: (Dimension length time: -1).
         self for: (oneFoot / oneHour) expect: oneFootDivOneHour.
+    ]
+
+    testRelationalOperators [
+        'Testing dimensioned rational relational operators...' displayNl.
+        self for: oneFoot = oneFoot expect: true.
+        self for: oneFoot = ((DRational scalar: (3048 %% 10000)) * DRational meter) expect: true.
+        self for: oneFoot < halfMeter expect: true.
+        self for: oneFoot <= halfMeter expect: true.
+        self for: oneFoot > halfMeter expect: false.
+        self for: oneFoot >= halfMeter expect: false.
+        self for: oneHour > oneSecond expect: true.
+        self for: oneHour >= oneSecond expect: true.
+        self for: oneHour < oneSecond expect: false.
+        self for: oneHour <= oneSecond expect: false.
+        self failsOn: [oneFoot < oneHour].
+        self failsOn: [oneFoot <= oneHour].
+        self failsOn: [oneFoot > oneHour].
+        self failsOn: [oneFoot >= oneHour].
     ]
 ]

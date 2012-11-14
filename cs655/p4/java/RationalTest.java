@@ -128,5 +128,19 @@ public class RationalTest extends Test
             System.out.println("Expected failure on (2/3) / (0/1)"); 
             Thread.dumpStack();
         }
+
+        // Relational operators.
+        System.out.println("Testing Rational relational operators...");
+        assertEquals(new Rational(1, 2).equals(new Rational(1, 2)), true);
+        assertEquals(new Rational(1, 2).lte(new Rational(1, 2)), true);
+        assertEquals(new Rational(1, 2).lt(new Rational(1, 2)), false);
+        assertEquals(new Rational(1, 3).lt(new Rational(1, 2)), true);
+        assertEquals(new Rational(1, 2).lt(new Rational(1, 3)), false);
+        assertEquals(new Rational(-1,2).lt(new Rational(1, 2)), true);
+        assertEquals(new Rational(1,2).gte(new Rational(1, 2)), true);
+        assertEquals(new Rational(1,2).gt(new Rational(1, 2)), false);
+        assertEquals(new Rational(-1,2).gt(new Rational(1, 2)), false);
+        assertEquals(new Rational(1,3).gt(new Rational(1, 2)), false);
+        assertEquals(new Rational(1,2).gt(new Rational(1, 3)), true);
     }
 }

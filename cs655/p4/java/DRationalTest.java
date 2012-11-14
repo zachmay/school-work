@@ -6,6 +6,7 @@ public class DRationalTest extends Test
                                            , Dimension.length());
         DRational oneFoot   = DRational.foot();
         DRational oneHour   = DRational.hour();
+        DRational oneSecond = DRational.second();
 
         System.out.println("Testing dimensioned rational creation methods...");
         assertEquals(halfMeter.getDimension(), Dimension.length());
@@ -74,5 +75,81 @@ public class DRationalTest extends Test
                            , Dimension.velocity());
         assertEquals(oneFoot.div(halfMeter), oneFootDivHalfMeter);
         assertEquals(oneFoot.div(oneHour), oneFootDivOneHour);
+
+        // DRational relational operators.
+        System.out.println("Testing dimensioned rational relational operators...");
+        
+        assertEquals(oneFoot.equals(oneFoot), true);
+        assertEquals(oneFoot.equals(
+                    DRational.scalar(new Rational(3048, 10000)).multiply(DRational.meter())),
+                    true);
+        assertEquals(oneFoot.lt(halfMeter), true);
+        assertEquals(oneFoot.lte(halfMeter), true);
+        assertEquals(oneFoot.gt(halfMeter), false);
+        assertEquals(oneFoot.gte(halfMeter), false);
+        assertEquals(oneHour.gt(oneSecond), true);
+        assertEquals(oneHour.gte(oneSecond), true);
+        assertEquals(oneHour.lt(oneSecond), false);
+        assertEquals(oneHour.lt(oneSecond), false);
+
+        failed = false;
+        try
+        {
+            oneFoot.lt(oneHour);
+        }
+        catch ( IllegalArgumentException e )
+        {
+            failed = true;
+        }
+        if ( !failed )
+        {
+            System.out.println("Expected failure on one foot < one hour.");
+            Thread.dumpStack();
+        }
+
+        failed = false;
+        try
+        {
+            oneFoot.lte(oneHour);
+        }
+        catch ( IllegalArgumentException e )
+        {
+            failed = true;
+        }
+        if ( !failed )
+        {
+            System.out.println("Expected failure on one foot <= one hour.");
+            Thread.dumpStack();
+        }
+
+        failed = false;
+        try
+        {
+            oneFoot.gt(oneHour);
+        }
+        catch ( IllegalArgumentException e )
+        {
+            failed = true;
+        }
+        if ( !failed )
+        {
+            System.out.println("Expected failure on one foot > one hour.");
+            Thread.dumpStack();
+        }
+
+        failed = false;
+        try
+        {
+            oneFoot.gte(oneHour);
+        }
+        catch ( IllegalArgumentException e )
+        {
+            failed = true;
+        }
+        if ( !failed )
+        {
+            System.out.println("Expected failure on one foot >= one hour.");
+            Thread.dumpStack();
+        }
     }
 }

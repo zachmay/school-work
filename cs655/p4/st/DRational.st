@@ -82,6 +82,26 @@ DRational extend
         ^ (self mag = aDRational mag) & (self dim = aDRational dim).
     ]
 
+    < aDRational [
+        self dimensionSafe: aDRational.
+        ^ (self mag < aDRational mag).
+    ]
+
+    <= aDRational [
+        self dimensionSafe: aDRational.
+        ^ (self mag < aDRational mag) | (self mag = aDRational mag).
+    ]
+
+    > aDRational [
+        self dimensionSafe: aDRational.
+        ^ (self mag > aDRational mag).
+    ]
+
+    >= aDRational [
+        self dimensionSafe: aDRational.
+        ^ (self mag > aDRational mag) | (self mag = aDRational mag).
+    ]
+
     " DRational addition. "
     + aDRational [
         self dimensionSafe: aDRational.

@@ -92,4 +92,19 @@ RationalTest extend
         self for: (5 %% 1) / (1 %% 5)   expect: (25 %% 1).
         self failsOn: [(2 %% 3) / (0 %% 1)].
     ]
+
+    testRelationalOperators [
+        'Testing relational operators on rationals...' displayNl.
+        self for: (1 %% 2)  =  (1 %% 2) expect: true.
+        self for: (1 %% 2)  <= (1 %% 2) expect: true.
+        self for: (1 %% 2)  <  (1 %% 2) expect: false.
+        self for: (1 %% 3)  <  (1 %% 2) expect: true.
+        self for: (1 %% 2)  <  (1 %% 3) expect: false.
+        self for: (-1 %% 2) <  (1 %% 2) expect: true.
+        self for: (1 %% 2)  >= (1 %% 2) expect: true.
+        self for: (1 %% 2)  >  (1 %% 2) expect: false.
+        self for: (-1 %% 2) >  (1 %% 2) expect: false.
+        self for: (1 %% 3)  >  (1 %% 2) expect: false.
+        self for: (1 %% 2)  >  (1 %% 3) expect: true.
+    ]
 ]

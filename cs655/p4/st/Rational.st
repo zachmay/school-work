@@ -133,6 +133,26 @@ Rational extend
         ^ (num = aRational num) & (den = aRational den).
     ]
 
+    < aRational
+    [
+        ^ (num * aRational den) < (aRational num * den)
+    ]
+
+    <= aRational
+    [
+        ^ (self < aRational) | (self = aRational)
+    ]
+
+    > aRational
+    [
+        ^ (num * aRational den) > (aRational num * den)
+    ]
+        
+    >= aRational
+    [
+        ^ (self > aRational) | (self = aRational)
+    ]
+
     " Simple accessors "
     num [ ^ num ]
     den [ ^ den ]
