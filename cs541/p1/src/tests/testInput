@@ -1,0 +1,20 @@
+insert kentucky 1848
+insert florida 1845
+lookup Kentucky
+lookup Florida
+lookup Hawaii
+insert kentucky 1836
+open
+insert kentucky 1836
+lookup Kentucky
+dump
+lookup Florida
+global Florida
+close
+lookup Kentucky
+lookup Florida
+close
+lookup Kentucky
+quit
+
+

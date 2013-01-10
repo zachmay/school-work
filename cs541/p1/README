@@ -1,0 +1,1 @@
+- Added @SupressWarnings("serial") annotation to suppress serialization warnings in Exception subclasses.
