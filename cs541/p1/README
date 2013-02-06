@@ -1,1 +1,23 @@
-- Added @SupressWarnings("serial") annotation to suppress serialization warnings in Exception subclasses.
+Zachary May
+CS 541
+Program 1
+
+BUILDING AND TESTING
+
+A Makefile is provided, modified from what was included in the startup package.
+I put together a makeshift testing harness (make test) that reads from tests.in
+and writes standard output to tests.out. This is then compared (using diff) to
+tests.expected. Any differences indicate a failed test. There is also a target
+test-interactive that builds the test driver and drops you straight into the
+driver program running interactively.
+
+IMPLEMENTATION
+
+I chose to add an additional class (NameScope) to model individual name scopes
+within the symbol table. SymbolTable's lookup and insertion methods delegate
+to the current (innermost) name scope.
+
+Also worth documenting are the SuppressWarnings annotations on the Exception
+subclasses. Since the base class is serializable, subclasses are expected
+to override specific methods in that interface. That was not relevant to this
+assignment, so the warnings are silenced with this annotation.

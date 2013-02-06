@@ -14,40 +14,51 @@
 ###
 
 SRC = ./src
-CLASSPATH = ./classes
+CLASSPATH = ./class
 VPATH = $(CLASSPATH)
 JCFLAGS = -Xlint:all -deprecation -classpath $(CLASSPATH) -d $(CLASSPATH)
 JFLAGS = -classpath $(CLASSPATH)
+TESTIN = tests.in
+TESTOUT = tests.out
+TESTEXPECTED = tests.expected 
 
-%.class: $(SRC)/%.java
-	javac $(JCFLAGS) $<
+all : $(CLASSPATH) P1.class EmptySTException.class SymbolTable.class \
+		TestSym.class Symb.class DuplicateException.class \
+		NameScope.class
 
-all : P1.class EmptySTException.class SymbolTable.class \
-		TestSym.class Symb.class DuplicateException.class 
+$(CLASSPATH):
+	mkdir -p $(CLASSPATH)
 
 P1.class : EmptySTException.class SymbolTable.class \
 		TestSym.class Symb.class DuplicateException.class
+
+NameScope.class : Symb.class DuplicateException.class
+
 TestSym.class : Symb.class
 
-SymbolTable.class : EmptySTException.class \
+SymbolTable.class : EmptySTException.class NameScope.class \
 		Symb.class DuplicateException.class
+
+%.class: $(SRC)/%.java
+	javac $(JCFLAGS) $<
 
 ###
 # test
 ###
 
 test: P1.class
-	java $(JFLAGS) P1 < testInput
+	java $(JFLAGS) P1 < $(TESTIN) > $(TESTOUT); \
+		diff $(TESTOUT) $(TESTEXPECTED)
+
+test-interactive: P1.class
+	java $(JFLAGS) P1
 
 ###
 # style check
 ###
 
-HOW = basic,braces,clone,design,finalizers,migrating,unusedcode,imports,optimizations,strictexception,strings,sunsecure,typeresolution
-
-style: 
-	t=`pwd`; cd ~raphael/source/pmd-4.2.5/bin; \
-		./pmd.sh $$t text $(HOW)
+style:
+	../pmd/bin/run.sh pmd -dir src -f text -rulesets java-basic,java-design,java-codesize,java-typeresolution,java-unusedcode
 
 ###
 # lint check
@@ -62,4 +73,5 @@ lint: all
 
 clean: 
 	rm -f $(CLASSPATH)/*.class
+	rm tests.out
 

@@ -1,0 +1,293 @@
+%%
+
+DIGIT=[0-9]
+LETTER=[a-zA-Z]
+ALNUM=DIGIT|LETTER
+
+%ignorecase
+
+%type Symbol
+%eofval{
+  return Symbol.create(SymbolTypes.EOF, 0, 0);
+%eofval}
+
+%%
+
+/**
+ * Operators and Punctuation
+ **/
+"(" {
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.create(SymbolTypes.LPAREN);
+}
+
+")" {
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.create(SymbolTypes.RPAREN);
+}
+
+"[" {
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.create(SymbolTypes.LBRACKET);
+}
+
+"]" {
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.create(SymbolTypes.RBRACKET);
+}
+
+"+"	{
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.create(SymbolTypes.PLUS);
+}
+
+"-" {
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.create(SymbolTypes.MINUS);
+}
+
+"*" { 
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.create(SymbolTypes.TIMES);
+}
+
+"/" { 
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.create(SymbolTypes.SLASH);
+}
+
+"=" {
+    Pos.setpos();
+    Pos.col += 1;
+    return Symbol.create(SymbolTypes.ASG);
+}
+
+"==" {
+    Pos.setpos();
+    Pos.col += 2;
+    return Symbol.create(SymbolTypes.EQ);
+}
+
+"!=" {
+	Pos.setpos();
+	Pos.col += 2;
+	return Symbol.create(SymbolTypes.NOTEQ);
+}
+
+"&&" {
+	Pos.setpos();
+	Pos.col += 2;
+	return Symbol.create(SymbolTypes.CAND);
+}
+
+"||" {
+	Pos.setpos();
+	Pos.col += 2;
+	return Symbol.create(SymbolTypes.COR);
+}
+
+"!" {
+    Pos.setpos();
+    Pos.col += 1;
+    return Symbol.create(SymbolTypes.NOT);
+}
+
+"<" {
+	Pos.setpos();
+	Pos.col += 1;
+	return Symbol.create(SymbolTypes.LT);
+}
+
+">" {
+	Pos.setpos();
+	Pos.col += 1;
+	return Symbol.create(SymbolTypes.GT);
+}
+
+"<=" {
+	Pos.setpos();
+	Pos.col += 1;
+	return Symbol.create(SymbolTypes.LEQ);
+}
+
+">=" {
+	Pos.setpos();
+	Pos.col += 1;
+	return Symbol.create(SymbolTypes.GEQ);
+}
+
+"{" {
+	Pos.setpos();
+	Pos.col += 1;
+	return Symbol.create(SymbolTypes.LBRACE);
+}
+
+"}" {
+	Pos.setpos();
+	Pos.col += 1;
+	return Symbol.create(SymbolTypes.RBRACE);
+}
+
+":"	{
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.create(SymbolTypes.COLON);
+}
+
+";"	{
+	Pos.setpos();
+	Pos.col +=1;
+    return Symbol.create(SymbolTypes.SEMI);
+}
+
+"," {
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.create(SymbolTypes.COMMA);
+}
+
+/**
+ * Reserved Words
+ **/
+
+"class" {
+    Pos.setpos();
+    Pos.col += yytext().length();
+    return Symbol.create(SymbolTypes.rw_CLASS);
+}
+
+"bool" | "break" | "char" | "class" | "const" | "continue" | "else" | "false" | "if" | "int" | "read" | "return" | "true" | "void" | "while" | "print" {
+    int symbolType = SymbolTypes.error;
+    String symbolText = yytext().toLowerCase();
+    Pos.setpos();
+    Pos.col += yytext().length();
+    return Symbol.create(SymbolTypes.stringToReservedWordType(symbolText));
+}
+
+/**
+ * Identifiers
+ **/
+
+{LETTER} ({LETTER} | {DIGIT})* {
+    Pos.setpos();
+    Pos.col += yytext().length();
+    return Symbol.createIdentifier(yytext());
+}
+
+/**
+ * Integer Literals
+ **/
+"~"? {DIGIT}+ {
+	// TODO: Check for overflow
+    String literal = yytext();
+	Pos.setpos();
+    Pos.col += literal.length();
+
+    int sign = literal.charAt(0) == '~' ? -1 : 1;
+    if ( sign == -1 ) {
+        literal = literal.substring(1);
+    } 
+    
+    int literalValue;
+    try {
+        literalValue = sign * Integer.parseInt(literal);
+    } catch ( NumberFormatException e ) {
+        return Symbol.createError("Integer overflow " + yytext());
+    }
+
+    return Symbol.createIntegerLiteral(literalValue);
+}
+
+/**
+ * Character Literals
+ **/
+"'" ([^'\\] | "\n" | "\t" | "\\" | "\'")  "'" {
+    String charValue = yytext();
+    int length = charValue.length();
+
+    Pos.setpos();
+    Pos.col += length;
+
+    String cleaned = charValue.substring(0, length - 1)
+                              .substring(1);
+
+    // TODO: Test this, seems off.
+    return Symbol.createCharLiteral(cleaned.charAt(0));
+}
+
+/**
+ * String Literals
+ **/
+\"  ( [^\\\"] | "\n" | "\t" | "\\" | \\\" )*  \" {
+    String stringValue = yytext();
+    int length = stringValue.length();
+
+    Pos.setpos();
+    Pos.col += length;
+
+    return Symbol.createStringLiteral(stringValue);
+}
+
+
+/**
+ * Comments
+ */
+"##" ("#"? [^#])* ## {
+    String comment = yytext();
+    Pos.setpos();
+    
+    // Count newlines. Convert \r or \r\n to \n to normalize
+    // newlines for counting.
+    int newlineCount = 0;
+    String fixedComment = comment.replace("\r\n", "\n")
+                                 .replace("\r", "\n");
+    int length = fixedComment.length();
+    for ( int i = 0; i < length; i++ ) {
+        if ( fixedComment.charAt(i) == '\n' ) {
+            newlineCount++;
+        }
+    }
+
+    // Update position. Advance line number by the newline count,
+    // Set new column count to the number of characters after the
+    // last newline in the token.
+    Pos.line += newlineCount;
+    Pos.col = fixedComment.length() - fixedComment.lastIndexOf('\n');
+}
+
+"//" [^\n]+ {
+    Pos.setpos();
+    Pos.line += 1;
+    Pos.col = 1;
+}
+
+/**
+ * Whitespace
+ **/
+\r|\n|\r\n {
+    Pos.setpos();
+	Pos.line += 1;
+	Pos.col = 1;
+}
+
+\t {
+    Pos.setpos();
+    Pos.col += 1;
+}
+
+" " {
+    Pos.setpos();
+	Pos.col += 1;
+}
+
+. {
+    return Symbol.createError("<<Unknown token>>");
+}

@@ -1,33 +1,93 @@
+/* Zachary May
+ * CS 541
+ * Program 1
+ *
+ * Modified from provided starting point.
+ */
 import java.io.*;
-class SymbolTable {
+import java.util.Hashtable;
 
-   SymbolTable() {/* complete this */ }
+/*
+ * Class SymbolTable
+ *
+ * Represents a block-scoped symbol table with methods
+ * for insertion, lookup, scope management, and debug
+ * information.
+ */
+class SymbolTable
+{
+    // The current innermost name scope.
+    NameScope currentScope = null;
 
-   public void openScope() {
-      /* complete this */ }
+    // Constructor: Open an initial name scope.
+    public SymbolTable() {
+        openScope();
+    }
 
-   public void closeScope() throws EmptySTException {
-      /* complete this */ }
+    // Open a new name scope.
+    // Ensures that the new scope has the current innermost scope as
+    // its outer name scope (for global lookups, etc.)
+    public void openScope() {
+        NameScope newScope = new NameScope();
+        newScope.setOuterScope(currentScope);
+        currentScope = newScope;
+    }
 
-   public void insert(Symb s) {
-      /* complete this */ }
+    // Close the innermost name scope.
+    // Uses the current scope's outer scope for the new innermost scope.
+    // Throws EmptySTException if there are no open name scopes.
+    public void closeScope() throws EmptySTException {
+        if ( currentScope == null ) {
+            throw new EmptySTException();
+        } else {
+            currentScope = currentScope.getOuterScope();
+        }
+    }
 
-   public Symb localLookup(String s) {
-      /* complete this */
-      return null; // change this
-   }
+    // Insert a symbol into the innermost name scope.
+    // Delegates to the innermost name scope's insert method.
+    // Throws EmptySTException is there are no open name scopes.
+    // Throws DuplicateException (bubbled up from NameScope::insert) if symbol
+    // name already exists.
+    public void insert(Symb s) throws EmptySTException, DuplicateException {
+        if ( currentScope == null ) {
+            throw new EmptySTException();
+        }
+        currentScope.insert(s);
+    }
 
-   public Symb globalLookup(String s) {
-      /* complete this */
-      return null; // change this
-   }
+    // Look up a symbol identifier in the innermost scope.
+    // Delegates to the innermost name scope's localLookup method.
+    // Returns null if there are no open name scopes.
+    public Symb localLookup(String s) {
+        if ( currentScope == null ) {
+            return null;
+        } else {
+            return currentScope.localLookup(s);
+        }
+    }
 
-   public String toString() {
-      /* complete this */
-      return ""; // change this
-   }
+    // Look up a symbol identifier in any open scoe.
+    // Delegates to the innermost name scoe's globalLookup metho,
+    // which follows outerScope links out to the outermost scope
+    // if necessary.
+    // Returns null if there are no open name scopes.
+    public Symb globalLookup(String s) {
+        if ( currentScope == null ) {
+            return null;
+        } else {
+            return currentScope.globalLookup(s);
+        }
+    }
 
-   void dump(PrintStream ps) {
-      /* complete this */
-   }
+    // Return a string representation of the symbol table.
+    public String toString() {
+        return (currentScope == null ? "" : currentScope.toString());
+    }
+
+    // Dump the string representation of the symbol table to a 
+    // given PrintStream.
+    void dump(PrintStream ps) {
+        ps.println(this.toString());
+    }
 } // class SymbolTable

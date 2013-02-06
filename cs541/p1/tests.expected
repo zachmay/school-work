@@ -1,0 +1,55 @@
+Project 1 test driver. Enter any of the following commands:
+  (Command prefixes are allowed)
+	Open (a new scope)
+	Close (innermost current scope)
+	Quit (test driver)
+	Dump (contents of symbol table)
+	Insert (symbol,integer pair into symbol table)
+	Lookup (lookup symbol in top scope)
+	Global (global lookup of symbol in symbol table)
+
+
+Top scope closed.
+Close failed. No open name scopes.
+Contents of symbol table:
+
+Insert failed. No open name scopes.
+Kentucky not found in top scope.
+New scope opened.
+(kentucky:1848) entered into symbol table.
+(florida:1845) entered into symbol table.
+(kentucky:1848) found in top scope.
+(florida:1845) found in top scope.
+Hawaii not found in top scope.
+kentucky already entered into top scope.
+New scope opened.
+(kentucky:1836) entered into symbol table.
+Contents of symbol table:
+{kentucky=(kentucky:1836)}
+{florida=(florida:1845), kentucky=(kentucky:1848)}
+
+Florida not found in top scope.
+(florida:1845) found in symbol table.
+Top scope closed.
+(kentucky:1848) found in top scope.
+(florida:1845) found in top scope.
+Top scope closed.
+Kentucky not found in top scope.
+New scope opened.
+(x:1) entered into symbol table.
+New scope opened.
+(y:2) entered into symbol table.
+New scope opened.
+(z:3) entered into symbol table.
+Contents of symbol table:
+{z=(z:3)}
+{y=(y:2)}
+{x=(x:1)}
+
+x not found in top scope.
+(x:1) found in symbol table.
+y not found in top scope.
+(y:2) found in symbol table.
+(z:3) found in top scope.
+(z:3) found in symbol table.
+Testing done
