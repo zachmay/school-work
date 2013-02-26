@@ -11,46 +11,22 @@
 #    test     -- Tests proj2 by running P2.class with input tiny.csx
 ###
 
-SRC = ./src
+SRC = .
+PKG_SRC = $(SRC)/net/sector42/cs541
 CLASSPATH = ./class
+PKG_CLASS = $(CLASSPATH)/net/sector42/cs541
 VPATH = $(CLASSPATH)
-JCFLAGS = -Xlint:all -deprecation -classpath $(CLASSPATH) -d $(CLASSPATH)
+JCFLAGS = -Xlint:all -deprecation -classpath $(CLASSPATH) -d $(CLASSPATH) -sourcepath . -Xprefer:source
 JFLAGS = -classpath $(CLASSPATH)
 JFLEX = ../jflex/bin/jflex
-JFLEXFLAGS = -d $(SRC)
+JFLEXFLAGS = -d $(PKG_SRC)
 
-$(CLASSPATH)/P2.class : $(SRC)/P2.java $(CLASSPATH)/Yylex.class
+JAVA_FILES = $(shell find $(SRC) -type f -name '*.java')
 
-$(CLASSPATH)/Symbol.class: $(SRC)/Symbol.java $(CLASSPATH)/SymbolTypes.class \
-$(CLASSPATH)/CSXToken.class \
-$(CLASSPATH)/CSXStringLitToken.class \
-$(CLASSPATH)/CSXCharLitToken.class \
-$(CLASSPATH)/CSXIdentifierToken.class \
-$(CLASSPATH)/CSXIntLitToken.class \
-$(CLASSPATH)/CSXErrorToken.class 
-	javac $(JCFLAGS) $<
+$(PKG_CLASS)/P2.class: $(JAVA_FILES) $(PKG_SRC)/Yylex.java
+	javac $(JCFLAGS) $(PKG_SRC)/P2.java
 
-$(CLASSPATH)/CSXToken.class: $(SRC)/CSXToken.java
-	javac $(JCFLAGS) $<
-
-$(CLASSPATH)/%Token.class: $(SRC)/%Token.java $(CLASSPATH)/CSXToken.class
-	javac $(JCFLAGS) $<
-
-$(CLASSPATH)/Pos.class: $(SRC)/Pos.java
-	javac $(JCFLAGS) $<
-
-$(CLASSPATH)/Yylex.class: $(SRC)/Yylex.java $(CLASSPATH)/Symbol.class $(CLASSPATH)/Pos.class
-	javac $(JCFLAGS) $<
-
-$(CLASSPATH)/%.class: $(SRC)/%.java $(CLASSPATH)/Pos.class
-	javac $(JCFLAGS) $<
-
-
-all : $(CLASSPATH)/P2.class $(CLASSPATH)/SymbolTypes.class $(CLASSPATH)/Yylex.class 
-
-$(CLASSPATH)/SymbolTypes.class: $(SRC)/SymbolTypes.java
-$(CLASSPATH)/Yylex.class: $(CLASSPATH)/SymbolTypes.class
-$(SRC)/Yylex.java: csx.jlex
+$(PKG_SRC)/Yylex.java: csx.jlex
 	rm -f $(SRC)/Yylex.java
 	$(JFLEX) $(JFLEXFLAGS) csx.jlex
 
@@ -58,21 +34,21 @@ $(SRC)/Yylex.java: csx.jlex
 # test
 ###
 
-test:   $(CLASSPATH)/P2.class $(CLASSPATH)/Yylex.class tiny.csx
-	java $(JFLAGS) P2 test.csx
+test:   $(PKG_CLASS)/P2.class tiny.csx
+	java $(JFLAGS) net.sector42.cs541.P2 test.csx
 
 ###
 # style check
 ###
 
 style:
-	../pmd/bin/run.sh pmd -dir src -f text -rulesets java-basic,java-design,java-codesize,java-typeresolution,java-unusedcode
+	../pmd/bin/run.sh pmd -dir $(SRC) -f text -rulesets java-basic,java-design,java-typeresolution,java-unusedcode | grep -v Yylex.java
 
 ###
 # lint check
 ###
 
-lint: all
+lint: $(PKG_CLASS)/P2.class
 	jlint +all classes
 
 ###
@@ -80,5 +56,5 @@ lint: all
 ###
 
 clean: 
-	rm -f $(CLASSPATH)/*.class $(SRC)/Yylex.java
+	rm -rf $(CLASSPATH)/* $(PKG_SRC)/Yylex.java
 

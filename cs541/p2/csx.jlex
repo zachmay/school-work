@@ -1,14 +1,17 @@
+package net.sector42.cs541;
+
+import net.sector42.cs541.tokens.*;
+import java.math.BigInteger;
 %%
 
 DIGIT=[0-9]
 LETTER=[a-zA-Z]
-ALNUM=DIGIT|LETTER
 
 %ignorecase
 
 %type Symbol
 %eofval{
-  return Symbol.create(SymbolTypes.EOF, 0, 0);
+  return Symbol.createEOF();
 %eofval}
 
 %%
@@ -19,157 +22,151 @@ ALNUM=DIGIT|LETTER
 "(" {
 	Pos.setpos();
 	Pos.col += 1;
-    return Symbol.create(SymbolTypes.LPAREN);
+    return Symbol.createLeftParen();
 }
 
 ")" {
 	Pos.setpos();
 	Pos.col += 1;
-    return Symbol.create(SymbolTypes.RPAREN);
+    return Symbol.createRightParen();
 }
 
 "[" {
 	Pos.setpos();
 	Pos.col += 1;
-    return Symbol.create(SymbolTypes.LBRACKET);
+    return Symbol.createLeftBracket();
 }
 
 "]" {
 	Pos.setpos();
 	Pos.col += 1;
-    return Symbol.create(SymbolTypes.RBRACKET);
+    return Symbol.createRightBracket();
 }
 
 "+"	{
 	Pos.setpos();
 	Pos.col += 1;
-    return Symbol.create(SymbolTypes.PLUS);
+    return Symbol.createPlus();
 }
 
 "-" {
 	Pos.setpos();
 	Pos.col += 1;
-    return Symbol.create(SymbolTypes.MINUS);
+    return Symbol.createMinus();
 }
 
 "*" { 
 	Pos.setpos();
 	Pos.col += 1;
-    return Symbol.create(SymbolTypes.TIMES);
+    return Symbol.createTimes();
 }
 
 "/" { 
 	Pos.setpos();
 	Pos.col += 1;
-    return Symbol.create(SymbolTypes.SLASH);
+    return Symbol.createDivide();
 }
 
 "=" {
     Pos.setpos();
     Pos.col += 1;
-    return Symbol.create(SymbolTypes.ASG);
+    return Symbol.createAssignment();
 }
 
 "==" {
     Pos.setpos();
     Pos.col += 2;
-    return Symbol.create(SymbolTypes.EQ);
+    return Symbol.createEquals();
 }
 
 "!=" {
 	Pos.setpos();
 	Pos.col += 2;
-	return Symbol.create(SymbolTypes.NOTEQ);
+	return Symbol.createNotEquals();
 }
 
 "&&" {
 	Pos.setpos();
 	Pos.col += 2;
-	return Symbol.create(SymbolTypes.CAND);
+	return Symbol.createLogicalAnd();
 }
 
 "||" {
 	Pos.setpos();
 	Pos.col += 2;
-	return Symbol.create(SymbolTypes.COR);
+	return Symbol.createLogicalOr();
 }
 
 "!" {
     Pos.setpos();
     Pos.col += 1;
-    return Symbol.create(SymbolTypes.NOT);
+    return Symbol.createLogicalNegation();
 }
 
 "<" {
 	Pos.setpos();
 	Pos.col += 1;
-	return Symbol.create(SymbolTypes.LT);
+	return Symbol.createLessThan();
 }
 
 ">" {
 	Pos.setpos();
 	Pos.col += 1;
-	return Symbol.create(SymbolTypes.GT);
+	return Symbol.createGreaterThan();
 }
 
 "<=" {
 	Pos.setpos();
 	Pos.col += 1;
-	return Symbol.create(SymbolTypes.LEQ);
+	return Symbol.createLessEqual();
 }
 
 ">=" {
 	Pos.setpos();
 	Pos.col += 1;
-	return Symbol.create(SymbolTypes.GEQ);
+	return Symbol.createGreaterEqual();
 }
 
 "{" {
 	Pos.setpos();
 	Pos.col += 1;
-	return Symbol.create(SymbolTypes.LBRACE);
+	return Symbol.createLeftBrace();
 }
 
 "}" {
 	Pos.setpos();
 	Pos.col += 1;
-	return Symbol.create(SymbolTypes.RBRACE);
+	return Symbol.createRightBrace();
 }
 
 ":"	{
 	Pos.setpos();
 	Pos.col += 1;
-    return Symbol.create(SymbolTypes.COLON);
+    return Symbol.createColon();
 }
 
 ";"	{
 	Pos.setpos();
 	Pos.col +=1;
-    return Symbol.create(SymbolTypes.SEMI);
+    return Symbol.createSemicolon();
 }
 
 "," {
 	Pos.setpos();
 	Pos.col += 1;
-    return Symbol.create(SymbolTypes.COMMA);
+    return Symbol.createComma();
 }
 
 /**
  * Reserved Words
  **/
 
-"class" {
-    Pos.setpos();
-    Pos.col += yytext().length();
-    return Symbol.create(SymbolTypes.rw_CLASS);
-}
-
 "bool" | "break" | "char" | "class" | "const" | "continue" | "else" | "false" | "if" | "int" | "read" | "return" | "true" | "void" | "while" | "print" {
     int symbolType = SymbolTypes.error;
     String symbolText = yytext().toLowerCase();
     Pos.setpos();
     Pos.col += yytext().length();
-    return Symbol.create(SymbolTypes.stringToReservedWordType(symbolText));
+    return Symbol.createKeywordFromString(yytext());
 }
 
 /**
@@ -186,21 +183,50 @@ ALNUM=DIGIT|LETTER
  * Integer Literals
  **/
 "~"? {DIGIT}+ {
-	// TODO: Check for overflow
     String literal = yytext();
 	Pos.setpos();
     Pos.col += literal.length();
 
-    int sign = literal.charAt(0) == '~' ? -1 : 1;
-    if ( sign == -1 ) {
-        literal = literal.substring(1);
-    } 
+    // Deal with negation.
+    if ( literal.charAt(0) == '~' )
+    {
+        literal = literal.replace('~', '-');
+    }
     
     int literalValue;
-    try {
-        literalValue = sign * Integer.parseInt(literal);
-    } catch ( NumberFormatException e ) {
-        return Symbol.createError("Integer overflow " + yytext());
+
+    // Check for overflow. We know literal an be parsed to
+    // a BigInteger based on the scanner rule for this
+    // token type and fixing any leading negation.
+    BigInteger b = new BigInteger(literal);
+    BigInteger maxInt = BigInteger.valueOf(Integer.MAX_VALUE);
+    BigInteger minInt = BigInteger.valueOf(Integer.MIN_VALUE);
+
+    if ( b.compareTo(maxInt) > 0 )
+    {
+        // Literal is greater than system max integer.
+        // Print a warning and use Integer.MAX_VALUE.
+        String msg = new StringBuffer("**ERROR: Integer overflow: ")
+                              .append(literal)
+                              .toString();
+        System.out.println(msg);
+        literalValue = Integer.MAX_VALUE;
+    }
+    else if ( b.compareTo(minInt) < 0 )
+    {
+        // Literal is less than system min integer.
+        // Print a warning and use Integer.MIN_VALUE.
+        String msg = new StringBuffer("**ERROR: Integer underflow: ")
+                              .append(literal)
+                              .toString();
+        System.out.println(msg);
+        literalValue = Integer.MIN_VALUE;
+    }
+    else
+    {
+        // If we get this far, b is within the bounds of our system's
+        // integer type and this conversion won't lose anything.
+        literalValue = b.intValue();
     }
 
     return Symbol.createIntegerLiteral(literalValue);
@@ -209,18 +235,14 @@ ALNUM=DIGIT|LETTER
 /**
  * Character Literals
  **/
-"'" ([^'\\] | "\n" | "\t" | "\\" | "\'")  "'" {
+"'" ([^'\\] | "\\n" | "\\t" | "\\\\" | "\\'")  "'" {
     String charValue = yytext();
     int length = charValue.length();
 
     Pos.setpos();
     Pos.col += length;
 
-    String cleaned = charValue.substring(0, length - 1)
-                              .substring(1);
-
-    // TODO: Test this, seems off.
-    return Symbol.createCharLiteral(cleaned.charAt(0));
+    return Symbol.createCharLiteral(charValue);
 }
 
 /**
@@ -238,7 +260,7 @@ ALNUM=DIGIT|LETTER
 
 
 /**
- * Comments
+ * Multi-line Comments
  */
 "##" ("#"? [^#])* ## {
     String comment = yytext();
@@ -263,10 +285,12 @@ ALNUM=DIGIT|LETTER
     Pos.col = fixedComment.length() - fixedComment.lastIndexOf('\n');
 }
 
+
+/**
+ * Single-line Comments
+ */
 "//" [^\n]+ {
-    Pos.setpos();
-    Pos.line += 1;
-    Pos.col = 1;
+    // Do nothing.
 }
 
 /**
@@ -289,5 +313,11 @@ ALNUM=DIGIT|LETTER
 }
 
 . {
-    return Symbol.createError("<<Unknown token>>");
+    Pos.setpos();
+    Pos.col += yytext().length();
+    String message = new StringBuffer("invalid token (")
+                              .append(yytext())
+                              .append(")")
+                              .toString();;
+    return Symbol.createError(message);
 }

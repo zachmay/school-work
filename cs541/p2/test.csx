@@ -4,8 +4,8 @@ class "BARF" 392 ~392 test {
    correctly ##+
 
 // String Literal Tests
-"ninja" "ni\nja" "ni\"ja" "ni/\\/ja" ""
-'a' '0' '\n' '\\' '\t' '\'' ' '  ''
+"ninja" "ni\nja"    "ni\"ja" "ni/\\/ja" ""
+'a' '0' '6' '\n' '\\' '\t' '\'' ' '  ''
 int i = 0 ## init to 0##;
 int j = ~123;
 int bigPos = 11111111111111111111111111111111111111;
@@ -49,3 +49,7 @@ if (i >= f(~3) || i <= f(i-1))
 	print( i , f(i) , "\n");
 
 } // That's all folks
+
+^%'a'@$
+
+String s = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";

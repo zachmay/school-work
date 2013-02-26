@@ -1,0 +1,62 @@
+Zachary May
+CS 541
+Program 2
+
+Building and Testing:
+
+A makefile is provided:
+
+- The default target builds the P2 executable. It makes use of the Java
+  compiler's capability to compile dependencies, so there are no separate
+  targets for other class files. This target does depend on all the Java source
+  files in the source tree (including the generated Yylex.java) so that make
+  will update P2 when any source file changes (or, recursively, the JFlex input
+  file).
+
+- An auxiliary target builds Yylex.java in the appropriate location.
+
+- The 'test' target will run P2 on the file test.csx.
+
+- The 'style' target will run a style checker (set-up based on my local
+  installation). It pipes this through grep to ignore style faults in
+  Yylex.java.
+
+- The 'lint' target runs JLint on the class/ directory.
+
+- The 'clean' target removes any built classes and the JFlex-generated
+  source file.
+
+Project Layout:
+
+I had some free time, so I took some effort to refactor the basic structure
+of the project. A moved all the classes defined inside the JFlex input
+file out into their own source files. I also generalized the approach of having
+subclasses of the base token type for string literals, integer literals, etc., and
+made subclasses for each type of token.
+
+This second change was motivated by a trend I noticed while working on the
+project. The obvious approach would have switch statements in several places
+throughout the code based on token type codes. For example, when outputting a
+token in the program's main loop, we might check for string literals, printing
+them a certain way, or a left parenthesis, printing it a different way.
+
+In a strongly-typed object-oriented language, this is a clear "code smell." 
+Altering behavior based on multi-way branching fails to make use of Java's
+subtype polymorphism: if two objects of some type A should behave differently
+in some respect based on some constant/final member value, then it might be
+worth making them instances of two subclasses of A. In the above example, client
+code can call toString() on a token to get its output representation and we
+are saved a switch statement over all possible token types, which would be
+unwieldy and error prone.
+
+The 'switch' approach also ignores the benefits of type safety. This again makes
+the code error-prone, since the compiler cannot enforce, e.g., the rule that
+left parenthesis tokens have a certain token type value. 
+
+Although this seems like a lot of additional work, it was mostly automated with
+some throwaway sed scripts, so it was not particularly onerous. It would be
+interesting to integrate this approach into the toolchain so that classes could
+be generated automatically based on JCup terminal symbol definitions.
+
+I'm not sure how this approach will interact with the parser generator tools
+in the next assignment, but I found it preferable for the purposes of this one.
