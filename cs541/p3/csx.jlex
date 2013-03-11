@@ -1,0 +1,323 @@
+package net.sector42.cs541;
+
+import net.sector42.cs541.tokens.*;
+import java.math.BigInteger;
+%%
+
+DIGIT=[0-9]
+LETTER=[a-zA-Z]
+
+%ignorecase
+
+%type Symbol
+%eofval{
+  return Symbol.createEOF();
+%eofval}
+
+%%
+
+/**
+ * Operators and Punctuation
+ **/
+"(" {
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.createLeftParen();
+}
+
+")" {
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.createRightParen();
+}
+
+"[" {
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.createLeftBracket();
+}
+
+"]" {
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.createRightBracket();
+}
+
+"+"	{
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.createPlus();
+}
+
+"-" {
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.createMinus();
+}
+
+"*" { 
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.createTimes();
+}
+
+"/" { 
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.createDivide();
+}
+
+"=" {
+    Pos.setpos();
+    Pos.col += 1;
+    return Symbol.createAssignment();
+}
+
+"==" {
+    Pos.setpos();
+    Pos.col += 2;
+    return Symbol.createEquals();
+}
+
+"!=" {
+	Pos.setpos();
+	Pos.col += 2;
+	return Symbol.createNotEquals();
+}
+
+"&&" {
+	Pos.setpos();
+	Pos.col += 2;
+	return Symbol.createLogicalAnd();
+}
+
+"||" {
+	Pos.setpos();
+	Pos.col += 2;
+	return Symbol.createLogicalOr();
+}
+
+"!" {
+    Pos.setpos();
+    Pos.col += 1;
+    return Symbol.createLogicalNegation();
+}
+
+"<" {
+	Pos.setpos();
+	Pos.col += 1;
+	return Symbol.createLessThan();
+}
+
+">" {
+	Pos.setpos();
+	Pos.col += 1;
+	return Symbol.createGreaterThan();
+}
+
+"<=" {
+	Pos.setpos();
+	Pos.col += 1;
+	return Symbol.createLessEqual();
+}
+
+">=" {
+	Pos.setpos();
+	Pos.col += 1;
+	return Symbol.createGreaterEqual();
+}
+
+"{" {
+	Pos.setpos();
+	Pos.col += 1;
+	return Symbol.createLeftBrace();
+}
+
+"}" {
+	Pos.setpos();
+	Pos.col += 1;
+	return Symbol.createRightBrace();
+}
+
+":"	{
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.createColon();
+}
+
+";"	{
+	Pos.setpos();
+	Pos.col +=1;
+    return Symbol.createSemicolon();
+}
+
+"," {
+	Pos.setpos();
+	Pos.col += 1;
+    return Symbol.createComma();
+}
+
+/**
+ * Reserved Words
+ **/
+
+"bool" | "break" | "char" | "class" | "const" | "continue" | "else" | "false" | "if" | "int" | "read" | "return" | "true" | "void" | "while" | "print" {
+    int symbolType = SymbolTypes.error;
+    String symbolText = yytext().toLowerCase();
+    Pos.setpos();
+    Pos.col += yytext().length();
+    return Symbol.createKeywordFromString(yytext());
+}
+
+/**
+ * Identifiers
+ **/
+
+{LETTER} ({LETTER} | {DIGIT})* {
+    Pos.setpos();
+    Pos.col += yytext().length();
+    return Symbol.createIdentifier(yytext());
+}
+
+/**
+ * Integer Literals
+ **/
+"~"? {DIGIT}+ {
+    String literal = yytext();
+	Pos.setpos();
+    Pos.col += literal.length();
+
+    // Deal with negation.
+    if ( literal.charAt(0) == '~' )
+    {
+        literal = literal.replace('~', '-');
+    }
+    
+    int literalValue;
+
+    // Check for overflow. We know literal an be parsed to
+    // a BigInteger based on the scanner rule for this
+    // token type and fixing any leading negation.
+    BigInteger b = new BigInteger(literal);
+    BigInteger maxInt = BigInteger.valueOf(Integer.MAX_VALUE);
+    BigInteger minInt = BigInteger.valueOf(Integer.MIN_VALUE);
+
+    if ( b.compareTo(maxInt) > 0 )
+    {
+        // Literal is greater than system max integer.
+        // Print a warning and use Integer.MAX_VALUE.
+        String msg = new StringBuffer("**ERROR: Integer overflow: ")
+                              .append(literal)
+                              .toString();
+        System.out.println(msg);
+        literalValue = Integer.MAX_VALUE;
+    }
+    else if ( b.compareTo(minInt) < 0 )
+    {
+        // Literal is less than system min integer.
+        // Print a warning and use Integer.MIN_VALUE.
+        String msg = new StringBuffer("**ERROR: Integer underflow: ")
+                              .append(literal)
+                              .toString();
+        System.out.println(msg);
+        literalValue = Integer.MIN_VALUE;
+    }
+    else
+    {
+        // If we get this far, b is within the bounds of our system's
+        // integer type and this conversion won't lose anything.
+        literalValue = b.intValue();
+    }
+
+    return Symbol.createIntegerLiteral(literalValue);
+}
+
+/**
+ * Character Literals
+ **/
+"'" ([^'\\] | "\\n" | "\\t" | "\\\\" | "\\'")  "'" {
+    String charValue = yytext();
+    int length = charValue.length();
+
+    Pos.setpos();
+    Pos.col += length;
+
+    return Symbol.createCharLiteral(charValue);
+}
+
+/**
+ * String Literals
+ **/
+\"  ( [^\\\"] | "\n" | "\t" | "\\" | \\\" )*  \" {
+    String stringValue = yytext();
+    int length = stringValue.length();
+
+    Pos.setpos();
+    Pos.col += length;
+
+    return Symbol.createStringLiteral(stringValue);
+}
+
+
+/**
+ * Multi-line Comments
+ */
+"##" ("#"? [^#])* ## {
+    String comment = yytext();
+    Pos.setpos();
+    
+    // Count newlines. Convert \r or \r\n to \n to normalize
+    // newlines for counting.
+    int newlineCount = 0;
+    String fixedComment = comment.replace("\r\n", "\n")
+                                 .replace("\r", "\n");
+    int length = fixedComment.length();
+    for ( int i = 0; i < length; i++ ) {
+        if ( fixedComment.charAt(i) == '\n' ) {
+            newlineCount++;
+        }
+    }
+
+    // Update position. Advance line number by the newline count,
+    // Set new column count to the number of characters after the
+    // last newline in the token.
+    Pos.line += newlineCount;
+    Pos.col = fixedComment.length() - fixedComment.lastIndexOf('\n');
+}
+
+
+/**
+ * Single-line Comments
+ */
+"//" [^\n]+ {
+    // Do nothing.
+}
+
+/**
+ * Whitespace
+ **/
+\r|\n|\r\n {
+    Pos.setpos();
+	Pos.line += 1;
+	Pos.col = 1;
+}
+
+\t {
+    Pos.setpos();
+    Pos.col += 1;
+}
+
+" " {
+    Pos.setpos();
+	Pos.col += 1;
+}
+
+. {
+    Pos.setpos();
+    Pos.col += yytext().length();
+    String message = new StringBuffer("invalid token (")
+                              .append(yytext())
+                              .append(")")
+                              .toString();;
+    return Symbol.createError(message);
+}

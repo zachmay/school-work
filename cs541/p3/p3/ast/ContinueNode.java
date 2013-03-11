@@ -1,10 +1,10 @@
 package p3.ast;
 
-class ContinueNode extends StatementNode
+public class ContinueNode extends StatementNode
 {
-	private final IdentifierNode label;
+	public final IdentifierNode label;
 
-	ContinueNode(IdentifierNode i, int line, int col)
+	public ContinueNode(IdentifierNode i, int line, int col)
     {
 		super(line, col);
 		label = i;

@@ -1,16 +1,16 @@
 package p3.ast;
 
-class IdentifierNode extends ExpressionNode
+public class IdentifierNode extends ExpressionNode
 {
-	private final String idname;
+	public final String idname;
 
-	IdentifierNode(String identname, int line, int col)
+	public IdentifierNode(String identname, int line, int col)
     {
 		super(line, col);
 		idname = identname;
 	}
 
-	void Unparse(int indent)
+	public void unparse(int indent)
     {
 		System.out.print(idname);
 	}

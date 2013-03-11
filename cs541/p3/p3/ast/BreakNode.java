@@ -1,10 +1,10 @@
 package p3.ast;
 
-class BreakNode extends StatementNode
+public class BreakNode extends StatementNode
 {
-	private final IdentifierNode label;
+	public final IdentifierNode label;
 
-	BreakNode(IdentifierNode i, int line, int col)
+	public BreakNode(IdentifierNode i, int line, int col)
     {
 		super(line, col);
 		label = i;

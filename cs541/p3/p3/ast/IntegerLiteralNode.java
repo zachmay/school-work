@@ -1,10 +1,10 @@
 package p3.ast;
 
-class IntegerLiteralNode extends ExpressionNode
+public class IntegerLiteralNode extends ExpressionNode
 {
-	private final int intval;
+	public final int intval;
 
-	IntegerLiteralNode(int val, int line, int col)
+	public IntegerLiteralNode(int val, int line, int col)
     {
 		super(line, col);
 		intval = val;

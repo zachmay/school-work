@@ -1,8 +1,8 @@
 package p3.ast;
 
-class IntTypeNode extends TypeNode
+public class IntTypeNode extends TypeNode
 {
-	IntTypeNode(int line, int col)
+	public IntTypeNode(int line, int col)
     {
 		super(line, col);
 	}

@@ -1,10 +1,10 @@
 package p3.ast;
 
-class ReturnNode extends StatementNode
+public class ReturnNode extends StatementNode
 {
-	private final ExpressionNode returnVal;
+	public final ExpressionNode returnVal;
 
-	ReturnNode(ExpressionNode e, int line, int col)
+	public ReturnNode(ExpressionNode e, int line, int col)
     {
 		super(line, col);
 		returnVal = e;

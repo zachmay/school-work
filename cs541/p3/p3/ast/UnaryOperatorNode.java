@@ -1,9 +1,11 @@
+package p3.ast;
+
 class UnaryOperatorNode extends ExpressionNode
 {
-	private final ExpressionNode operand;
-	private final int operatorCode; // Token code of the operator
+	public final ExpressionNode operand;
+	public final int operatorCode; // Token code of the operator
 
-	UnaryOperatorNode(int op, ExpressionNode e, int line, int col)
+	public UnaryOperatorNode(int op, ExpressionNode e, int line, int col)
     {
 		super(line, col);
 		operand = e;

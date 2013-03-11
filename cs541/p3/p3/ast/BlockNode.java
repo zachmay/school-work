@@ -1,11 +1,11 @@
 package p3.ast;
 
-class BlockNode extends StatementNode
+public class BlockNode extends StatementNode
 {
-	private final FieldDeclarationsNode decls;
-	private final StatementsNode stmts;
+	public final FieldDeclarationsNode decls;
+	public final StatementsNode stmts;
 
-	BlockNode(FieldDeclarationsNode f, StatementsNode s, int line, int col)
+	public BlockNode(FieldDeclarationsNode f, StatementsNode s, int line, int col)
     {
 		super(line, col);
 		decls = f;

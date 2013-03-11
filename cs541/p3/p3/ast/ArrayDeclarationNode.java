@@ -1,8 +1,9 @@
 package p3.ast;
 
-class ArrayDeclarationNode extends DeclarationNode
+public class ArrayDeclarationNode extends FieldDeclarationNode
 {
-	ArrayDeclarationNode(IdentifierNode id, TypeNode t, IntegerLiteralNode lit, int line, int col)
+	public ArrayDeclarationNode(IdentifierNode id,
+            TypeNode t, IntegerLiteralNode lit, int line, int col)
     {
 		super(line, col);
 		arrayName = id;
@@ -10,7 +11,7 @@ class ArrayDeclarationNode extends DeclarationNode
 		arraySize = lit;
 	}
 
-	private final IdentifierNode arrayName;
-	private final TypeNode elementType;
-	private final IntegerLiteralNode arraySize;
+	public final IdentifierNode arrayName;
+	public final TypeNode elementType;
+	public final IntegerLiteralNode arraySize;
 } // class ArrayDeclarationNode

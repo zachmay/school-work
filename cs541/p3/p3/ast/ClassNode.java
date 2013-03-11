@@ -1,14 +1,20 @@
 package p3.ast;
 
-class ClassNode extends ASTNode
-{
-	private final identNode className;
-	private final memberDeclsNode members;
+import java.util.Vector;
 
-	ClassNode(identNode id, memberDeclsNode memb, int line, int col)
+public class ClassNode extends ASTNode
+{
+	public final IdentifierNode className;
+	public final Vector<FieldDeclarationNode> fields;
+	public final Vector<MethodDeclarationNode> methods;
+
+	public ClassNode(IdentifierNode id,
+                     Vector<FieldDeclarationNode> fields,
+                     Vector<MethodDeclarationNode> methods, int line, int col)
     {
 		super(line, col);
-		className = id;
-		members = memb;
+		this.className = id;
+        this.fields = fields;
+        this.methods = methods;
 	} // classNode
 } // class classNode

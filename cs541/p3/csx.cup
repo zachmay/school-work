@@ -1,0 +1,457 @@
+/**
+ * Zachary May
+ * Java CUP sepcification for CSX.
+ **/
+import java_cup.runtime.*;
+import java.util.Vector;
+import java.lang.StringBuffer;
+import p3.ast.*;
+import p3.tokens.*;
+
+parser code {:
+    public void syntax_error(Symbol curToken)
+    {
+        String message = StringBuffer("Syntax error at ")
+                              .append(curToken.value.linenum)
+                              .append(":")
+                              .append(curToken.value.colnum)
+                              .toString();
+
+        report_error(message, null);
+    }
+:};
+
+init with {: :};
+
+scan with {: return Scanner.next_token(); :};
+
+/* Terminals */
+terminal Assignment      ASSIGN;
+terminal CharLit         CHAR_LIT;
+terminal Colon           COLON;
+terminal Comma           COMMA;
+terminal Divide          DIVIDE;
+terminal Equals          EQUALS;
+terminal GreaterEqual    GE;
+terminal GreaterThan     GT;
+terminal Identifier      IDENTIFIER;
+terminal IntLit          INT_LIT;
+terminal KeywordBool     K_BOOL;
+terminal KeywordBreak    K_BREAK;
+terminal KeywordChar     K_CHAR;
+terminal KeywordClass    K_CLASS;
+terminal KeywordConst    K_CONST;
+terminal KeywordContinue K_CONTINUE;
+terminal KeywordElse     K_ELSE;
+terminal KeywordFalse    K_FALSE;
+terminal KeywordIf       K_IF;
+terminal KeywordInt      K_INT;
+terminal KeywordPrint    K_PRINT;
+terminal KeywordRead     K_READ;
+terminal KeywordReturn   K_RETURN;
+terminal KeywordTrue     K_TRUE;
+terminal KeywordVoid     K_VOID;
+terminal KeywordWhile    K_WHILE;
+terminal LeftBrace       LEFT_BRACE;
+terminal LeftBracket     LEFT_BRACKET;
+terminal LeftParen       LEFT_PAREN;
+terminal LessEqual       LE;
+terminal LessThan        LT;
+terminal LogicalAnd      LOGICAL_AND;
+terminal LogicalNegation LOGICAL_NEGATION;
+terminal LogicalOr       LOGICAL_OR;
+terminal Minus           MINUS;
+terminal NotEquals       NE;
+terminal Plus            PLUS;
+terminal RightBrace      RIGHT_BRACE;
+terminal RightBracket    RIGHT_BRACKET;
+terminal RightParen      RIGHT_PAREN;
+terminal Semicolon       SEMICOLON;
+terminal StringLit       STRING_LIT;
+terminal Times           TIMES;
+
+/* Non-terminals */
+non terminal ClassNode                       program;
+non terminal Vector                          fieldDeclarations;
+non terminal Vector                          methodDeclarations;
+non terminal                                 optionalSemi;
+non terminal MethodDeclarationNode           methodDeclaration;
+non terminal Vector                          argDeclarations;
+non terminal ArgumentDeclarationNode         argDeclaration;
+non terminal FieldDeclarationNode            fieldDeclaration;
+non terminal Vector                          statements;
+non terminal StatementNode                   statement;
+non terminal Vector                          readList;
+non terminal Vector                          printList;
+non terminal ExpressionNode                  expression;
+non terminal TypeNode                        type;
+non terminal Vector                          arguments;
+non terminal ExpressionNode                  term;
+non terminal ExpressionNode                  factor;
+non terminal ExpressionNode                  pri;
+non terminal ExpressionNode                  unary;
+non terminal ExpressionNode                  unit;
+non terminal NameNode                        name;
+
+precedence nonassoc K_ELSE;
+precedence nonassoc K_IF;
+
+
+start with program;
+
+program ::= K_CLASS:c IDENTIFIER:id LEFT_BRACE fieldDeclarations:fds methodDeclarations:mds RIGHT_BRACE
+            {:
+                IdentifierNode idNode = new IdentifierNode(id.identifierText, id.linenum, id.colnum);
+                Vector<FieldDeclarationNode>  typedFDs = (Vector<FieldDeclarationNode>)fds;
+                Vector<MethodDeclarationNode> typedMDs = (Vector<MethodDeclarationNode>)mds;
+                RESULT = new ClassNode(idNode, typedFDs, typedMDs, c.linenum, c.colnum);
+            :};
+
+fieldDeclarations ::= fieldDeclarations:decls fieldDeclaration:decl
+                      {:
+                          Vector<FieldDeclarationNode> fds = (Vector<FieldDeclarationNode>)decls;
+                          fds.add(decl);
+                          RESULT = fds;
+                      :}
+                    |
+                      {:
+                          RESULT = new Vector<FieldDeclarationNode>();
+                      :};
+
+methodDeclarations ::= methodDeclaration:decl methodDeclarations:decls 
+                       {:
+                           Vector<MethodDeclarationNode> mds = (Vector<MethodDeclarationNode>)decls;
+                           mds.add(0, decl); 
+                           RESULT = mds;
+                       :}
+                     |
+                       {:
+                           RESULT = new Vector<MethodDeclarationNode>();
+                       :};
+
+optionalSemi::= SEMICOLON
+              | ;
+
+methodDeclaration ::= K_VOID:v IDENTIFIER:id LEFT_PAREN RIGHT_PAREN LEFT_BRACE fieldDeclarations:fds statements:stmts RIGHT_BRACE optionalSemi
+                      {:
+                          IdentifierNode idNode = new IdentifierNode(id.identifierText, id.linenum, id.colnum);
+                          Vector<ArgumentDeclarationNode> argsTyped   = new Vector<ArgumentDeclarationNode>();
+                          Vector<FieldDeclarationNode>    fieldsTyped = (Vector<FieldDeclarationNode>)fds;
+                          Vector<StatementNode>           stmtsTyped  = (Vector<StatementNode>)stmts;
+                          TypeNode t = new VoidTypeNode(v.linenum, v.colnum);
+                          RESULT = new MethodDeclarationNode(idNode, argsTyped, t, fieldsTyped, stmtsTyped, v.linenum, v.colnum);
+                      :}
+                    | K_VOID:v IDENTIFIER:id LEFT_PAREN argDeclarations:args RIGHT_PAREN LEFT_BRACE fieldDeclarations:fds statements:stmts RIGHT_BRACE optionalSemi
+                      {:
+                          IdentifierNode idNode = new IdentifierNode(id.identifierText, id.linenum, id.colnum);
+                          Vector<ArgumentDeclarationNode> argsTyped   = (Vector<ArgumentDeclarationNode>)args;
+                          Vector<FieldDeclarationNode>    fieldsTyped = (Vector<FieldDeclarationNode>)fds;
+                          Vector<StatementNode>           stmtsTyped  = (Vector<StatementNode>)stmts;
+                          TypeNode t = new VoidTypeNode(v.linenum, v.colnum);
+                          RESULT = new MethodDeclarationNode(idNode, argsTyped, t, fieldsTyped, stmtsTyped, v.linenum, v.colnum);
+                      :}
+                    | type:t IDENTIFIER:id LEFT_PAREN RIGHT_PAREN LEFT_BRACE fieldDeclarations:fds statements:stmts RIGHT_BRACE optionalSemi
+                      {:
+                          IdentifierNode idNode = new IdentifierNode(id.identifierText, id.linenum, id.colnum);
+                          Vector<ArgumentDeclarationNode> args = new Vector<ArgumentDeclarationNode>();
+                          Vector<FieldDeclarationNode>    fieldsTyped = (Vector<FieldDeclarationNode>)fds;
+                          Vector<StatementNode>           stmtsTyped  = (Vector<StatementNode>)stmts;
+                          RESULT = new MethodDeclarationNode(idNode, args, t, fieldsTyped, stmtsTyped, t.linenum, t.colnum);
+                      :}
+                    | type:t IDENTIFIER:id LEFT_PAREN argDeclarations:args RIGHT_PAREN LEFT_BRACE fieldDeclarations:fds statements:stmts RIGHT_BRACE optionalSemi
+                      {:
+                          IdentifierNode idNode = new IdentifierNode(id.identifierText, id.linenum, id.colnum);
+                          Vector<ArgumentDeclarationNode> argsTyped   = (Vector<ArgumentDeclarationNode>)args;
+                          Vector<FieldDeclarationNode>    fieldsTyped = (Vector<FieldDeclarationNode>)fds;
+                          Vector<StatementNode>           stmtsTyped  = (Vector<StatementNode>)stmts;
+                          RESULT = new MethodDeclarationNode(idNode, argsTyped, t, fieldsTyped, stmtsTyped, t.linenum, t.colnum);
+                      :};
+
+argDeclarations ::= argDeclarations:ads COMMA argDeclaration:ad
+                    {:
+                        Vector<ArgumentDeclarationNode> r = (Vector<ArgumentDeclarationNode>)ads;
+                        r.add(ad);
+                        RESULT = r;
+                    :}
+                  | argDeclaration:ad
+                    {:
+                        Vector<ArgumentDeclarationNode> ads = new Vector<ArgumentDeclarationNode>();
+                        ads.add(ad);
+                        RESULT = ads;
+                    :};
+
+argDeclaration ::= type:t IDENTIFIER:id 
+                   {:
+                       IdentifierNode idNode = new IdentifierNode(id.identifierText, id.linenum, id.colnum);
+                       RESULT = new ArgumentDeclarationNode(idNode, t, false, t.linenum, t.colnum);
+                   :}
+                 | type:t IDENTIFIER:id LEFT_BRACKET RIGHT_BRACKET
+                   {:
+                       IdentifierNode idNode = new IdentifierNode(id.identifierText, id.linenum, id.colnum);
+                       RESULT = new ArgumentDeclarationNode(idNode, t, true, t.linenum, t.colnum);
+                   :};
+
+fieldDeclaration ::= type:t IDENTIFIER:id SEMICOLON
+                     {:
+                         IdentifierNode idNode = new IdentifierNode(id.identifierText, id.linenum, id.colnum);
+                         RESULT = new VariableDeclarationNode(t, idNode, null, t.linenum, t.colnum);
+                     :}
+                   | type:t IDENTIFIER:id ASSIGN expression:e SEMICOLON
+                     {:
+                         IdentifierNode idNode = new IdentifierNode(id.identifierText, id.linenum, id.colnum);
+                         RESULT = new VariableDeclarationNode(t, idNode, e, t.linenum, t.colnum);
+                     :}
+                   | type:t IDENTIFIER:id LEFT_BRACKET INT_LIT:i RIGHT_BRACKET SEMICOLON
+                     {:
+                         IdentifierNode idNode = new IdentifierNode(id.identifierText, id.linenum, id.colnum);
+                         RESULT = new ArrayDeclarationNode(idNode, t, i, t.linenum, t.colnum);
+                     :}
+                   | K_CONST:c IDENTIFIER:id ASSIGN expression:e SEMICOLON
+                     {:
+                         IdentifierNode idNode = new IdentifierNode(id.identifierText, id.linenum, id.colnum);
+                         RESULT = new ConstantDeclarationNode(idNode, e, c.linenum, c.colnum);
+                     :};
+
+statements ::= statement:s statements:ss
+               {:
+                   Vector<StatementNode> statements = (Vector<StatementNode>)ss;
+                   statements.add(s);
+                   RESULT = statements;
+               :}
+             |
+               {:
+                   RESULT = new Vector<StatementNode>();
+               :};
+
+statement ::= K_IF:theIf LEFT_PAREN expression:e RIGHT_PAREN statement:s
+              {:
+                  RESULT = new IfThenNode(e, s, StatementNode.NULL, 
+                                          theIf.linenum,
+                                          theIf.colnum);
+              :}
+            | K_IF:theIf LEFT_PAREN expression:e RIGHT_PAREN statement:si K_ELSE statement:se
+              {:
+                  RESULT = new IfThenNode(e, si, se, theIf.linenum, theIf.colnum);
+              :}
+            | K_WHILE:theWhile LEFT_PAREN expression:e RIGHT_PAREN statement:s
+              {:
+                  RESULT = new WhileNode(IdentifierNode.NULL, e, s, theWhile.linenum, theWhile.colnum); 
+              :}
+            | IDENTIFIER:id COLON K_WHILE:theWhile LEFT_PAREN expression:e RIGHT_PAREN statement:s
+              {:
+                  RESULT = new WhileNode(id, e, s, theWhile.linenum, theWhile.colnum);
+              :}
+            | IDENTIFIER:id ASSIGN expression:e SEMICOLON
+              {:
+                  RESULT = new AssignmentNode(id, e, id.linenum, id.colnum);
+              :}
+            | K_READ:read LEFT_PAREN readList:r RIGHT_PAREN SEMICOLON
+              {:
+                  RESULT = new ReadNode(r, read.linenum, read.colnum);
+              :}
+            | K_PRINT:print LEFT_PAREN printList:p RIGHT_PAREN SEMICOLON
+              {:
+                  RESULT = new PrintNode(p, print.linenum, print.colnum);
+              :}
+            | IDENTIFIER:id LEFT_PAREN RIGHT_PAREN SEMICOLON
+              {:
+                  Vector<ExpressionNode> arguments = new Vector<ExpressionNode>();
+                  RESULT = new FunctionCallNode(id, arguments, id.linenum, id.colnum);
+              :}
+            | IDENTIFIER:id LEFT_PAREN arguments:as RIGHT_PAREN SEMICOLON
+              {:
+                  RESULT = new FunctionCallNode(id, as, id.linenum, id.colnum);
+              :}
+            | K_RETURN:ret SEMICOLON
+              {:
+                  RESULT = new ReturnNode(ExpressionNode.NULL, ret.linenum, ret.colnum);
+              :}
+            | K_RETURN:ret expression:e SEMICOLON
+              {:
+                  RESULT = new ReturnNode(e, ret.linenum, ret.colnum);
+              :}
+            | K_BREAK:b IDENTIFIER:id SEMICOLON
+              {:
+                  RESULT = new BreakNode(id, b.linenum, b.colnum);
+              :}
+            | K_CONTINUE:c IDENTIFIER:id SEMICOLON
+              {:
+                  RESULT = new ContinueNode(id, c.linenum, c.colnum);
+              :}
+            | LEFT_BRACE:lb statements:ss RIGHT_BRACE optionalSemi
+              {:
+                  RESULT = new BlockNode(ss, lb.linenum, lb.colnum);
+              :};
+
+readList ::= readList:rl COMMA name:n
+             {:
+                 Vector<NameNode> names = (Vector<NameNode>)rl;
+                 names.add(n);
+                 RESULT = names;
+             :}
+           | name:n
+             {:
+                 Vector<NameNode> names = new Vector<NameNode>();
+                 names.add(n);
+                 RESULT = names;
+             :};
+
+printList ::= printList:pl COMMA expression:e
+              {:
+                  Vector<ExpressionNode> expressions = (Vector<ExpressionNode>)pl;
+                  expressions.add(n);
+                  RESULT = expressions;
+              :}
+            | name:n
+              {:
+                  Vector<ExpressionNode> expressions = new Vector<ExpressionNode>();
+                  expressions.add(n);
+                  RESULT = expressions;
+              :};
+
+type ::= K_CHAR:c
+         {:
+             RESULT = new CharType(b.linenum, b.colnum);
+         :}
+       | K_INT:i
+         {:
+             RESULT = new IntType(b.linenum, b.colnum);
+         :}
+       | K_BOOL:b
+         {:
+             RESULT = new BoolType(b.linenum, b.colnum);
+         :};
+
+arguments ::= expression:e COMMA arguments:as
+              {:
+                  Vector<ArgumentNode> arguments = (Vector<ArgumentNode>)as;
+                  arguments.add(e);
+                  RESULT = arguments;
+              :}
+            | expression:e
+              {:
+                  Vector<ArgumentNode> arguments = new Vector<ArgumentNode>();
+                  arguments.add(e);
+                  RESULT = arguments;
+              :};
+
+expression ::= expression:left LOGICAL_OR:or term:right
+               {:
+                   RESULT = BinaryOperatorNode(left, or, right);
+               :}
+             | expression:left LOGICAL_AND:and term:right
+               {:
+                   RESULT = BinaryOperatorNode(left, and, right);
+               :}
+             | term:t
+               {:
+                   RESULT = t;
+               :};
+
+term ::= factor:left LT factor:right
+         {:
+             RESULT = BinaryOperatorNode(left, LessThan.TOKEN_TYPE, right);
+         :}
+       | factor:left LE factor:right
+         {:
+             RESULT = BinaryOperatorNode(left, LessEqual.TOKEN_TYPE, right);
+         :}
+       | factor:left GT factor:right
+         {:
+             RESULT = BinaryOperatorNode(left, GreaterThan.TOKEN_TYPE, right);
+         :}
+       | factor:left GE  factor:right
+         {:
+             RESULT = BinaryOperatorNode(left, GreaterEqual.TOKEN_TYPE, right);
+         :}
+       | factor:left EQUALS factor:right
+         {:
+             RESULT = BinaryOperatorNode(left, Equals.TOKEN_TYPE, right);
+         :}
+       | factor:left NE factor:right
+         {:
+             RESULT = BinaryOperatorNode(left, NotEquals.TOKEN_TYPE, right);
+         :}
+       | factor:f
+         {:
+             RESULT = f;
+         :};
+
+factor ::= factor:f PLUS pri:p
+           {:
+               RESULT = BinaryOperatorNode(p, Plus.TOKEN_TYPE, u, p.linenum, p.colnum);
+           :}
+         | factor:f MINUS pri:p
+           {:
+               RESULT = BinaryOperatorNode(p, Minus.TOKEN_TYPE, u, p.linenum, p.colnum);
+           :};
+
+pri ::= pri:p TIMES unary:u
+        {:
+            RESULT = BinaryOperatorNode(p, Times.TOKEN_TYPE, u, p.linenum, p.colnum);
+        :}
+      | pri:p DIVIDE unary:u
+        {:
+            RESULT = BinaryOperatorNode(p, Divide.TOKEN_TYPE, u, p.linenum, p.colnum);
+        :}
+      | unary:u
+        {:
+            RESULT = u;
+        :};
+
+unary ::= LOGICAL_NEGATION:neg unary:u
+          {:
+              RESULT = new UnaryOperatorNode(neg.TOKEN_TYPE, u, neg.linenum, neg.colnum);
+          :}
+        | LEFT_PAREN:lp type:t RIGHT_PAREN unary:u
+          {:
+              RESULT = new CastNode(t, u, lp.linenum, lp.colnum);
+          :}
+        | unit:u
+          {:
+              RESULT = u;
+          :};
+
+unit ::= name:n
+         {:
+             RESULT = n;
+         :}
+       | name:n LEFT_PAREN RIGHT_PAREN
+         {:
+             Vector<ExpressionNode> arguments = new Vector<ExpressionNode>();
+             RESULT = new FunctionCallNode(n, arguments, n.linenum, n.colnum);
+         :}
+       | name:n LEFT_PAREN arguments:args RIGHT_PAREN
+         {:
+             RESULT = new FunctionCallNode(n, args, n.linenum, n.colnum);
+         :}
+       | INT_LIT:i
+         {:
+             RESULT = new IntegerLiteralNode(i, i.linenum, i.colnum);
+         :}
+       | CHAR_LIT:c
+         {:
+             RESULT = new CharacterLiteralNode(c, c.linenum, c.colnum);
+         :}
+       | STRING_LIT:s
+         {:
+             RESULT = new StringLiteralNode(s, s.linenum, s.colnum);
+         :}
+       | K_TRUE:t
+         {:
+             RESULT = new TrueNode(t.linenum, t.colnum); 
+         :}
+       | K_FALSE:f
+         {:
+             RESULT = new FalseNode(f.linenum, f.colnum); 
+         :};
+
+name ::= IDENTIFIER:id
+         {:
+             RESULT = new NameNode(id, ExpressionNode.NULL, id.linenum, id.colnum);
+         :}
+       | IDENTIFIER:id LEFT_BRACKET expression:e RIGHT_BRACKET
+         {:
+             RESULT = new NameNode(id, e, id.linenum, id.colnum);
+         :};
+

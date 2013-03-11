@@ -1,6 +1,6 @@
 package p3.ast;
 
-class CSXLiteNode extends ASTNode
+public class CSXLiteNode extends ASTNode
 {
     // This node is used to root CSX lite programs 
 

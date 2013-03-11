@@ -1,12 +1,13 @@
 package p3.ast;
 
-class BinaryOperatorNode extends ExpressionNode
+public class BinaryOperatorNode extends ExpressionNode
 {
-	private final ExpressionNode leftOperand;
-	private final ExpressionNode rightOperand;
-	private final int operatorCode; // Token code of the operator
+	public final ExpressionNode leftOperand;
+	public final ExpressionNode rightOperand;
+	public final int operatorCode; // Token code of the operator
 
-	BinaryOperatorNode(ExpressionNode e1, int op, ExpressionNode e2, int line, int col)
+	public BinaryOperatorNode(ExpressionNode e1,
+            int op, ExpressionNode e2, int line, int col)
     {
 		super(line, col);
 		operatorCode = op;
@@ -14,7 +15,7 @@ class BinaryOperatorNode extends ExpressionNode
 		rightOperand = e2;
 	}
 
-	static void printOp(int op)
+	public static void printOp(int op)
     {
 		switch (op)
         {
@@ -29,7 +30,7 @@ class BinaryOperatorNode extends ExpressionNode
 		}
 	}
 
-	void Unparse(int indent)
+	public void Unparse(int indent)
     {
 		System.out.print("(");
 		leftOperand.Unparse(0);

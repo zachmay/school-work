@@ -1,8 +1,8 @@
 package p3.ast;
 
-class BoolTypeNode extends TypeNode
+public class BoolTypeNode extends TypeNode
 {
-	BoolTypeNode(int line, int col)
+	public BoolTypeNode(int line, int col)
     {
 		super(line, col);
 	}

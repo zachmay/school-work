@@ -1,8 +1,8 @@
 package p3.ast;
 
-class FalseNode extends ExpressionNode
+public class FalseNode extends ExpressionNode
 {
-	FalseNode(int line, int col)
+	public FalseNode(int line, int col)
     {
 		super(line, col);
 	}

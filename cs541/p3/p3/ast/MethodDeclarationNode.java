@@ -1,25 +1,28 @@
 package p3.ast;
 
-class MethodDeclarationNode extends ASTNode
+import java.util.Vector;
+
+public class MethodDeclarationNode extends ASTNode
 {
-    MethodDeclarationNode(IdentifierNode id,
-                          ArgumentDeclarationsNode a,
+    public final IdentifierNode name;
+    public final Vector<ArgumentDeclarationNode> arguments;
+    public final TypeNode returnType;
+    public final Vector<FieldDeclarationNode> declarations;
+    public final Vector<StatementNode> statements;
+
+    public MethodDeclarationNode(IdentifierNode id,
+                          Vector<ArgumentDeclarationNode> args,
                           TypeNode t,
-                          FieldDeclarationsNode f,
-                          StatementsNode s,
+                          Vector<FieldDeclarationNode> fds,
+                          Vector<StatementNode> stmts,
                           int line,
                           int col)
     {
         super(line, col);
         name = id;
-        args = a;
+        arguments = args;
         returnType = t;
-        decls = f;
-        stmts = s;
+        declarations = fds;
+        statements = stmts;
     }
-    private final IdentifierNode name;
-    private final ArgumentDeclarationsNode args;
-    private final TypeNode returnType;
-    private final FieldDeclarationsNode decls;
-    private final StatementsNode stmts;
 } // class MethodDeclarationNode

@@ -1,12 +1,12 @@
 package p3.ast;
 
-class IfThenNode extends StatementNode
+public class IfThenNode extends StatementNode
 {
-	private final ExpressionNode condition;
-	private final StatementNode thenPart;
-	private final StatementNode elsePart;
+	public final ExpressionNode condition;
+	public final StatementNode thenPart;
+	public final StatementNode elsePart;
 
-	IfThenNode(ExpressionNode e, StatementNode s1, StatementNode s2, int line, int col)
+	public IfThenNode(ExpressionNode e, StatementNode s1, StatementNode s2, int line, int col)
     {
 		super(line, col);
 		condition = e;
@@ -14,15 +14,15 @@ class IfThenNode extends StatementNode
 		elsePart = s2;
 	}
 
-	void unparse(int indent)
+	public void unparse(int indent)
     {
         // TODO: Fix unparse for else clause.
 		System.out.print(linenum + ":");
 		genIndent(indent);
 		System.out.print("if (");
-		condition.Unparse(0);
+		condition.unparse(0);
 		System.out.println(")");
-		thenPart.Unparse(indent+1);
+		thenPart.unparse(indent+1);
 		// No else parts in CSX-lite
 	}
 } // class IfThenNode 

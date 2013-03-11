@@ -1,24 +1,24 @@
 package p3.ast;
 
-class AssignmentNode extends StatementNode
+public class AssignmentNode extends StatementNode
 {
-	private final NameNode target;
-	private final ExpressionNode source;
+	public final NameNode target;
+	public final ExpressionNode source;
 
-	AssignmentNode(NameNode n, ExpressionNode e, int line, int col)
+	public AssignmentNode(NameNode n, ExpressionNode e, int line, int col)
     {
 		super(line, col);
 		target = n;
 		source = e;
 	}
 
-	void unparse(int indent)
+	public void unparse(int indent)
     {
 		System.out.print(linenum + ":");
 		genIndent(indent);
-		target.Unparse(0);
+		target.unparse(0);
 		System.out.print(" = ");
-		source.Unparse(0);
+		source.unparse(0);
 		System.out.println(";");
 	}
 } // class AssignmentNode 

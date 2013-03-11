@@ -1,11 +1,11 @@
 package p3.ast;
 
-class ValueArgumentDeclarationNode extends ArgumentDeclarationNode
+public class ValueArgumentDeclarationNode extends ArgumentDeclarationNode
 {
-	private final IdentifierNode argName;
-	private final TypeNode argType;
+	public final IdentifierNode argName;
+	public final TypeNode argType;
 
-	ValueArgumentDeclarationNode(IdentifierNode id, TypeNode t, int line, int col)
+	public ValueArgumentDeclarationNode(IdentifierNode id, TypeNode t, int line, int col)
     {
 		super(line, col);
 		argName = id;

@@ -1,12 +1,13 @@
 package p3.ast;
 
-class VariableDeclarationNode extends DeclarationNode
+public class VariableDeclarationNode extends FieldDeclarationNode
 {
-	private final IdentifierNode varName;
-	private final TypeNode varType;
-	private final ExpressionNode initValue;
+	public final TypeNode varType;
+	public final IdentifierNode varName;
+	public final ExpressionNode initValue;
 
-	VariableDeclarationNode(IdentifierNode id, TypeNode t, ExpressionNode e, int line, int col)
+	public VariableDeclarationNode(TypeNode t, IdentifierNode id,
+            ExpressionNode e, int line, int col)
     {
 		super(line, col);
 		varName = id;

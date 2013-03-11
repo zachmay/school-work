@@ -1,8 +1,8 @@
 package p3.ast;
 
-class VoidTypeNode extends TypeNode
+public class VoidTypeNode extends TypeNode
 {
-    VoidTypeNode(int line, int col)
+    public VoidTypeNode(int line, int col)
     {
         super(line, col);
     }

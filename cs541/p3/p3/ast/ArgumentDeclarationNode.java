@@ -1,15 +1,17 @@
 package p3.ast;
 
-// abstract superclass; only subclasses are actually created
-abstract class ArgumentDeclarationNode extends ASTNode
+public class ArgumentDeclarationNode extends ASTNode
 {
-    ArgumentDeclarationNode()
-    {
-        super();
-    }
+    private final IdentifierNode argName;
+    private final TypeNode elementType;
+    private final boolean isArray;
 
-    ArgumentDeclarationNode(int l, int c)
+    public ArgumentDeclarationNode(IdentifierNode id,
+            TypeNode t, boolean isArray, int line, int col)
     {
-        super(l, c);
+        super(line, col);
+        this.argName = id;
+        this.elementType = t;
+        this.isArray = isArray;
     }
-}
+} // class ArrayArgumentDeclarationNode

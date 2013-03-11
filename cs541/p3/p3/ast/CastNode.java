@@ -1,11 +1,11 @@
 package p3.ast;
 
-class CastNode extends ExpressionNode
+public class CastNode extends ExpressionNode
 {
-	private final ExpressionNode operand;
-	private final TypeNode resultType;
+	public final ExpressionNode operand;
+	public final TypeNode resultType;
 
-	CastNode(TypeNode t, ExpressionNode e, int line, int col)
+	public CastNode(TypeNode t, ExpressionNode e, int line, int col)
     {
 		super(line, col);
 		operand = e;

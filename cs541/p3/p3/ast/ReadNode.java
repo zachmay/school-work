@@ -1,20 +1,20 @@
 package p3.ast;
 
-class ReadNode extends StatementNode
+import java.util.Vector;
+
+public class ReadNode extends StatementNode
 {
-    static NullReadNode NULL = new NullReadNode();
-    private NameNode targetVar;
-    private ReadNode moreReads;
+    public Vector<NameNode> targetVars;
 
-    ReadNode()
-    {
-        // Empty.
-    }
-
-    ReadNode(NameNode n, ReadNode rn, int line, int col)
+    public ReadNode(int line, int col)
     {
         super(line, col);
-        targetVar = n;
-        moreReads = rn;
+        targetVars = new Vector<NameNode>();
+    }
+
+    public ReadNode(Vector<NameNode> vars, int line, int col)
+    {
+        super(line, col);
+        targetVars = vars;
     }
 } // class ReadNode 

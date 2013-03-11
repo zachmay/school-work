@@ -1,11 +1,11 @@
-package p3;
+package p3.ast;
 
-abstract class ASTNode
+public abstract class ASTNode
 {
     // abstract superclass; only subclasses are actually created
 
-    int linenum;
-    int colnum;
+    public int linenum;
+    public int colnum;
 
     static void genIndent(int indent)
     {
@@ -15,24 +15,24 @@ abstract class ASTNode
         }
     } // genIndent
 
-    ASTNode()
+    public ASTNode()
     {
         linenum = -1;
         colnum  = -1;
     } // ASTNode()
 
-    ASTNode(int line, int col)
+    public ASTNode(int line, int col)
     {
         linenum = line;
         colnum  = col;
     } // ASTNode(line, col)
 
-    boolean isNull()
+    public boolean isNull()
     {
         return false; // often redefined in a subclass
     } // isNull()
 
-    void unparse(int indent)
+    public void unparse(int indent)
     {
         // Typically redefined in subclasses.
     } // unparse()

@@ -13,22 +13,30 @@
 #
 ###
 
-DESTPATH = ./classes
-CUPPATH = /homes/raphael/courses/cs541/public/cup
-CLASSPATH = $(DESTPATH):$(CUPPATH)/java-cup-10k.jar
-VPATH = $(DESTPATH)
+DESTPATH = ./class
+CUPPATH = ../cup/java-cup-10k.jar
+CLASSPATH = $(DESTPATH):$(CUPPATH)
 JCFLAGS = -Xlint:all -deprecation -classpath $(CLASSPATH) -d $(DESTPATH)
 JFLAGS = -classpath $(CLASSPATH)
+
+JCFLAGS = -deprecation -classpath $(CLASSPATH) -d $(DESTPATH) -sourcepath . -Xprefer:source
 
 %.class: %.java
 	javac $(JCFLAGS) $<
 
-.PHONY: all 
-all: P3.class Yylex.class test.lite parser.class 
 
 # don't use CUP 0.11a; I couldn't get it to work right.  -- Raphael 2/2011
-sym.java parser.java: lite.cup 
-	java $(JFLAGS) java_cup/Main < lite.cup
+p3/parse/Symbols.java p3/parse/Parser.java: csx.cup 
+	java $(JFLAGS) java_cup/Main -package p3.parse -parser Parser -symbols Symbols < csx.cup
+	mv Symbols.java p3/parse/Symbols.java
+	mv Parser.java p3/parse/Parser.java
+
+class/p3/parse/Parser.class: p3/parse/Parser.java
+	javac $(JCFLAGS) $<
+
+class/p3/ast/%.class: p3/ast/%.java
+	javac $(JCFLAGS) $<
+
 Yylex.java: lite.jlex
 	jflex lite.jlex
 parser.class: ASTNode.class Scanner.class
@@ -56,7 +64,7 @@ style:
 ###
 
 lint: all
-	jlint +all classes
+	jlint +all $(DESTPATH)
 
 ###
 # clean

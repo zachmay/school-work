@@ -1,10 +1,10 @@
 package p3.ast;
 
-class CharacterLiteralNode extends ExpressionNode
+public class CharacterLiteralNode extends ExpressionNode
 {
-	private final char charval;
+	public final char charval;
 
-	CharacterLiteralNode(char val, int line, int col)
+	public CharacterLiteralNode(char val, int line, int col)
     {
 		super(line, col);
 		charval = val;

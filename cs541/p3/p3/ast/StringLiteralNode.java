@@ -1,10 +1,10 @@
 package p3.ast;
 
-class StringLiteralNode extends ExpressionNode
+public class StringLiteralNode extends ExpressionNode
 {
-	private final String strval;
+	public final String strval;
 
-	StringLiteralNode(String stringval, int line, int col)
+	public StringLiteralNode(String stringval, int line, int col)
     {
 		super(line, col);
 		strval = stringval;

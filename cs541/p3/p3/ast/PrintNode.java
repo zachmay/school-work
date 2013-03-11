@@ -1,22 +1,21 @@
 package p3.ast;
 
-class PrintNode extends StatementNode
-{
-	private ExpressionNode outputValue;
-	private PrintNode morePrints;
+import java.util.Vector;
 
-	PrintNode()
+public class PrintNode extends StatementNode
+{
+	public Vector<ExpressionNode> outputExpressions;
+
+	public PrintNode(int line, int col)
     {
-        // Empty.
+        super(line, col);
+        outputExpressions = new Vector<ExpressionNode>();
     }
 
-	PrintNode(ExpressionNode val, PrintNode pn, int line, int col)
+	public PrintNode(Vector<ExpressionNode> exprs, int line, int col)
     {
 		super(line, col);
-		outputValue = val;
-		morePrints = pn;
+        outputExpressions = exprs;
 	}
-
-	static NullPrintNode NULL = new NullPrintNode();
 } // class PrintNode 
 
