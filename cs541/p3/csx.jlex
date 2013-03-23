@@ -1,6 +1,6 @@
-package net.sector42.cs541;
+package lite.scanner;
 
-import net.sector42.cs541.tokens.*;
+import lite.scanner.tokens.*;
 import java.math.BigInteger;
 %%
 

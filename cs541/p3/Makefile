@@ -18,36 +18,47 @@ CUPPATH = ../cup/java-cup-10k.jar
 CLASSPATH = $(DESTPATH):$(CUPPATH)
 JCFLAGS = -Xlint:all -deprecation -classpath $(CLASSPATH) -d $(DESTPATH)
 JFLAGS = -classpath $(CLASSPATH)
-
+JFLEX = ../jflex/bin/jflex
+JFLEXFLAGS = -d lite/scanner
 JCFLAGS = -deprecation -classpath $(CLASSPATH) -d $(DESTPATH) -sourcepath . -Xprefer:source
 
-%.class: %.java
+class/lite/P3.class: lite/P3.java class/lite/parse/Parser.class class/lite/scanner/LiteScanner.class
 	javac $(JCFLAGS) $<
-
 
 # don't use CUP 0.11a; I couldn't get it to work right.  -- Raphael 2/2011
-p3/parse/Symbols.java p3/parse/Parser.java: csx.cup 
-	java $(JFLAGS) java_cup/Main -package p3.parse -parser Parser -symbols Symbols < csx.cup
-	mv Symbols.java p3/parse/Symbols.java
-	mv Parser.java p3/parse/Parser.java
+lite/parse/Symbols.java lite/parse/Parser.java: csx.cup 
+	java $(JFLAGS) java_cup/Main -package lite.parse -parser Parser -symbols Symbols < csx.cup
+	mv Symbols.java lite/parse/Symbols.java
+	mv Parser.java lite/parse/Parser.java
 
-class/p3/parse/Parser.class: p3/parse/Parser.java
+class/lite/parse/Parser.class: lite/parse/Parser.java $(DESTPATH) 
 	javac $(JCFLAGS) $<
 
-class/p3/ast/%.class: p3/ast/%.java
+class/lite/ast/%.class: lite/ast/%.java
 	javac $(JCFLAGS) $<
 
-Yylex.java: lite.jlex
-	jflex lite.jlex
-parser.class: ASTNode.class Scanner.class
-Yylex.class: sym.class 
-Scanner.class: Yylex.class
-ASTNode.class: ast.java sym.class
-	javac $(JCFLAGS) ast.java
-P3.class: Yylex.class Scanner.class parser.class ASTNode.class
+class/lite/ast/ArrayDeclarationNode.class: lite/ast/ArrayDeclarationNode.java
+	javac $(JCFLAGS) $<	
 
-test: all
-	java $(JFLAGS) P3 test.lite
+class/lite/scanner/tokens/%.class: lite/scanner/tokens/%.java
+	javac $(JCFLAGS) $<
+
+class/lite/scanner/LiteScanner.class: lite/scanner/LiteScanner.java class/lite/scanner/Yylex.class
+	javac $(JCFLAGS) $<
+
+class/lite/scanner/Yylex.class: lite/scanner/Yylex.java
+	javac $(JCFLAGS) $<
+
+lite/scanner/Yylex.java: csx.jlex
+	rm -f lite/scanner/Yylex.java
+	$(JFLEX) $(JFLEXFLAGS) csx.jlex
+	# Do some clean-up on the generated Yylex class
+	# so that it works from within a package.
+	sed -i '' -e's/class Yylex/public class Yylex/' lite/scanner/Yylex.java
+	sed -i '' -e's/Yylex(/public Yylex\(/' lite/scanner/Yylex.java
+
+test: class/lite/P3.class
+	java $(JFLAGS) lite.P3 test.lite
 
 ###
 # style check
@@ -71,4 +82,7 @@ lint: all
 ###
 
 clean: 
-	rm -f $(DESTPATH)/*.class Yylex.java* sym.java parser.java
+	rm -rf $(DESTPATH)/*
+	rm -f lite/parse/Symbols.java
+	rm -f lite/parse/Parser.java
+	rm -f lite/scanner/Yylex.java

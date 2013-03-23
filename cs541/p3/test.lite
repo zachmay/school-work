@@ -1,8 +1,96 @@
+class TestClass
 {
-	aa  = aa+bb-cc-dd;
-	bb = bbb;
-	if ( id+bb+cc-dd )
-		if ( aaa )
-			ccc=dd;
-	aa = ccc ; 
+    int a = x;
+    bool b = x;
+    char c = x;
+    int a[10];
+    const z = x;
+    void voidMethodNoArgs()
+    {
+        char        aa
+        = x;
+        char bb;
+        x = y;
+        if ( aaa )
+            if ( bbb )
+                y = x;
+            else
+                z = banana;
+        else
+            x = papaya;
+        aa = bb;
+    };
+
+    void voidMethodWithArgs(int a, bool bs[], char c)
+    {
+        x = y;
+        while ( never )
+            banana = banana;
+        dingo: while ( banana )
+            shazam = x;
+            if(messy)
+                while(messy){
+                    if(messy){
+                        int clean=wash;
+                        x=clean;y=x;x=
+                        scissors;
+                        if(whiskers){chumby=wizards;}
+                        clean = x;}}
+    };
+
+    int intMethodNoArgs()
+    {
+        x = y;
+        wizards();
+        wizards(x, y, shazbot);
+        shazbot = wizards(shazbot, wizards(x, y, banana(banana, banana)), banana);
+        y = x;
+        return shazbot;
+    }
+
+    char charMethodWithArgs(int a, bool bs[], char c)
+    {
+        break dance;
+        continue dance;
+        return;
+    }
+
+    bool boolMethodNoArgs()
+    {
+        bool b = z;
+        print(message);
+        read(x, y, z);
+        print(z, y, z);
+    }
+
+    int expressionText()
+    {
+        int x = 5;
+        char c = 'c';
+        bool t = true;
+        bool f = false;
+        char s = "THIS \n IS \n\t A STRING";
+        x = x + x * (x + x);
+        y = x + x * x + x;
+        y = x - x / x - x;
+        z = x + x + x + x;
+        z = x - x - x - x;
+        z = x / x / x / x;
+        z = x * x * x * x;
+        z = x < y * z;
+        z = x >= y * z;
+        z = x <= y + z;
+        read(a, a[i], a[2]);
+        if ( x < 1 )
+            if ( x <= 1 )
+                if ( x > 1 )
+                    if ( x >= 1 )
+                        if ( x == 1 )
+                            if ( x != 1 )
+                                if ( !(x == 1) )
+                                    print(a, b, c);
+
+    }
+
+    void emptyMethod(){}
 }
